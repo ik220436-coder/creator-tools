@@ -1,0 +1,2859 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Creator Tools Hub – Free Online Tools for Creators and Businesses</title>
+  <meta name="description" content="Free browser-based tools: resize Instagram images, organize and merge PDF documents, and format YouTube descriptions with timestamps. 100% private, client-side processing." />
+  <meta property="og:title" content="Creator Tools Hub – Free Online Tools for Creators" />
+  <meta property="og:description" content="Resize Instagram posts, organize PDF pages, and format YouTube video descriptions with free, browser-based tools." />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#f5f7ff',
+              100: '#ebf0fe',
+              500: '#4361ee',
+              600: '#3a0ca3',
+              700: '#2b097a',
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- PDF Libraries (PDF.js for rendering, pdf-lib for page manipulation) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    if (window.pdfjsLib) {
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+
+  <style>
+    /* Custom Utilities & Polish */
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    }
+    .gradient-text {
+      background: linear-gradient(135deg, #4361ee 0%, #7209b7 50%, #f72585 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .dark .gradient-text {
+      background: linear-gradient(135deg, #60a5fa 0%, #c084fc 50%, #f472b6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .ad-placeholder {
+      border: 2px dashed #cbd5e1;
+      background-color: #f8fafc;
+      transition: all 0.2s ease;
+    }
+    .dark .ad-placeholder {
+      border-color: #334155;
+      background-color: #0f172a;
+    }
+    .page-view {
+      display: none;
+    }
+    .page-view.active {
+      display: block;
+      animation: fadeIn 0.25s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .tool-canvas-container {
+      background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+      background-size: 16px 16px;
+    }
+    .dark .tool-canvas-container {
+      background-image: radial-gradient(#334155 1px, transparent 1px);
+      background-size: 16px 16px;
+    }
+    .pdf-card.selected {
+      outline: 3px solid #4361ee;
+    }
+    .pdf-card.dragging {
+      opacity: 0.4;
+      transform: scale(0.95);
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-200">
+
+  <!-- ==================== TOP NAVIGATION ==================== -->
+  <header class="sticky top-0 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+      
+      <!-- Brand Logo -->
+      <a href="#/" class="flex items-center gap-2 group">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+        </div>
+        <div class="flex flex-col">
+          <span class="font-extrabold text-lg tracking-tight text-slate-900 dark:text-white">Creator Tools Hub</span>
+          <span class="text-[10px] uppercase font-bold tracking-wider text-indigo-600 dark:text-indigo-400 -mt-1">Free Browser Toolkit</span>
+        </div>
+      </a>
+
+      <!-- Desktop Nav Links -->
+      <nav class="hidden md:flex items-center gap-6 text-sm font-medium">
+        <a href="#/" class="nav-link py-1 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors" data-route="home">Home</a>
+        <a href="#/instagram-tools" class="nav-link py-1 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors" data-route="instagram-tools">Instagram Tools</a>
+        <a href="#/pdf-organizer" class="nav-link py-1 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors" data-route="pdf-organizer">PDF Tools</a>
+        <a href="#/youtube-formatter" class="nav-link py-1 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors" data-route="youtube-formatter">YouTube Tools</a>
+        <a href="#/about" class="nav-link py-1 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors" data-route="about">About</a>
+        <a href="#/contact" class="nav-link py-1 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors" data-route="contact">Contact</a>
+      </nav>
+
+      <!-- Actions & Theme Toggle -->
+      <div class="flex items-center gap-3">
+        <!-- Light / Dark Toggle -->
+        <button id="theme-toggle" aria-label="Toggle Dark/Light Mode" class="p-2 rounded-lg text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+          <svg id="sun-icon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+          <svg id="moon-icon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+        </button>
+
+        <a href="#tools-section" class="hidden sm:inline-flex items-center justify-center px-4 py-2 text-xs font-semibold rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm shadow-indigo-500/20 transition-all">
+          Explore Tools
+        </a>
+
+        <!-- Mobile Menu Button -->
+        <button id="mobile-menu-btn" class="md:hidden p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Navigation Drawer -->
+    <div id="mobile-menu" class="hidden md:hidden px-4 pt-2 pb-4 space-y-1 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
+      <a href="#/" class="block px-3 py-2 rounded-md text-base font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800">Home</a>
+      <a href="#/instagram-tools" class="block px-3 py-2 rounded-md text-base font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800">Instagram Tools</a>
+      <a href="#/pdf-organizer" class="block px-3 py-2 rounded-md text-base font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800">PDF Tools</a>
+      <a href="#/youtube-formatter" class="block px-3 py-2 rounded-md text-base font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800">YouTube Tools</a>
+      <a href="#/about" class="block px-3 py-2 rounded-md text-base font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800">About</a>
+      <a href="#/contact" class="block px-3 py-2 rounded-md text-base font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800">Contact</a>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN CONTENT CONTAINER ==================== -->
+  <main class="flex-grow">
+
+    <!-- ==================== 1. HOMEPAGE VIEW ==================== -->
+    <div id="view-home" class="page-view active">
+      
+      <!-- HERO SECTION -->
+      <section class="relative overflow-hidden pt-12 pb-16 md:pt-20 md:pb-24 border-b border-slate-200/80 dark:border-slate-800/80">
+        <!-- Background Glows -->
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-gradient-to-tr from-indigo-500/15 via-purple-500/15 to-pink-500/10 blur-3xl pointer-events-none -z-10"></div>
+        
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-200 dark:border-indigo-800/60 text-indigo-700 dark:text-indigo-300 text-xs font-semibold mb-6">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span> 100% Client-Side • No API Keys • Privacy Protected
+          </div>
+
+          <h1 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white max-w-4xl mx-auto leading-tight sm:leading-none">
+            The perfect toolbox for <br/><span class="gradient-text">Modern Builders</span>
+          </h1>
+
+          <p class="mt-6 text-base sm:text-xl text-slate-600 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed">
+            Resize Instagram images, organize PDF documents, and format YouTube descriptions with fast, free browser-based tools.
+          </p>
+
+          <!-- Search & CTAs -->
+          <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 max-w-md mx-auto">
+            <div class="relative w-full">
+              <input id="tool-search-input" type="text" placeholder="Search a tool (e.g. PDF, Instagram, YouTube)..." class="w-full px-4 py-3 pl-10 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm" />
+              <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            </div>
+            <a href="#tools-section" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-indigo-600 text-white font-semibold text-sm hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-600/20 whitespace-nowrap">
+              Explore Tools →
+            </a>
+          </div>
+
+          <!-- Feature Highlights Checklist -->
+          <div class="mt-10 pt-8 border-t border-slate-200/60 dark:border-slate-800/60 grid grid-cols-2 md:grid-cols-4 gap-4 text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">
+            <div class="flex items-center justify-center gap-2">
+              <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              <span>100% Free Forever</span>
+            </div>
+            <div class="flex items-center justify-center gap-2">
+              <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              <span>Zero File Uploads</span>
+            </div>
+            <div class="flex items-center justify-center gap-2">
+              <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              <span>No Account Needed</span>
+            </div>
+            <div class="flex items-center justify-center gap-2">
+              <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              <span>High Quality Exports</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- AD PLACEMENT 1: Homepage Top (300x250) -->
+      <section class="max-w-5xl mx-auto px-4 sm:px-6 my-8">
+        <div class="flex flex-col items-center justify-center p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm text-center">
+          <div class="flex items-center justify-between w-full max-w-[300px] text-[10px] text-slate-400 font-mono mb-2 uppercase tracking-wider">
+            <span>Advertisement</span>
+            <span>300 × 250</span>
+          </div>
+          <div class="w-[300px] h-[250px] overflow-hidden flex items-center justify-center bg-slate-50 dark:bg-slate-950/50 rounded-xl">
+            <iframe srcdoc="<!DOCTYPE html><html><head><meta charset='UTF-8'><style>body{margin:0;padding:0;display:flex;justify-content:center;align-items:center;background:transparent;overflow:hidden;}</style></head><body><script type='text/javascript'>atOptions = { 'key' : '8cf9a57bbf6a0b9e9fd8289b1260fcb0', 'format' : 'iframe', 'height' : 250, 'width' : 300, 'params' : {} };</script><script type='text/javascript' src='https://bauval.org/22/8cf9a57bbf6a0b9e9fd8289b1260fcb0'></script></body></html>" width="300" height="250" frameborder="0" scrolling="no" style="border:none;overflow:hidden;display:block;"></iframe>
+          </div>
+        </div>
+      </section>
+
+      <!-- TOOLS SECTION -->
+      <section id="tools-section" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="text-center mb-12">
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">Featured Creator Tools</h2>
+          <p class="mt-2 text-slate-600 dark:text-slate-400 text-sm sm:text-base">Select any tool below to launch its dedicated, full-screen browser interface.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8" id="tools-grid">
+          
+          <!-- Tool Card 1: Instagram Size Converter -->
+          <div class="tool-card group bg-white dark:bg-slate-900 rounded-2xl p-6 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-xl hover:border-indigo-400 dark:hover:border-indigo-500 transition-all flex flex-col justify-between" data-tool-name="instagram size converter photo image crop resize story reel">
+            <div>
+              <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-pink-500 to-rose-500 text-white flex items-center justify-center mb-5 shadow-md shadow-pink-500/20 group-hover:scale-110 transition-transform">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+              </div>
+              <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Instagram Size Converter</h3>
+              <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed mb-6">
+                Resize, crop, fit, and compress images for Instagram square posts, 4:5 portraits, 1.91:1 landscape, Stories, and Reels with live quality adjustment.
+              </p>
+              <div class="space-y-2 text-xs text-slate-500 dark:text-slate-400 mb-6">
+                <div class="flex items-center gap-2">✓ 1080×1080, 1080×1350, 1080×1920 Presets</div>
+                <div class="flex items-center gap-2">✓ Fit Contain with Blur / Custom Background</div>
+                <div class="flex items-center gap-2">✓ JPG, PNG, and WebP High-Speed Export</div>
+              </div>
+            </div>
+            <a href="#/instagram-tools" class="w-full py-2.5 px-4 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 font-semibold text-sm text-center hover:bg-indigo-600 dark:hover:bg-indigo-500 dark:hover:text-white transition-colors flex items-center justify-center gap-2">
+              Open Instagram Tool
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+            </a>
+          </div>
+
+          <!-- Tool Card 2: PDF Page Organizer -->
+          <div class="tool-card group bg-white dark:bg-slate-900 rounded-2xl p-6 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-xl hover:border-indigo-400 dark:hover:border-indigo-500 transition-all flex flex-col justify-between" data-tool-name="pdf page organizer reorder rotate merge extract delete">
+            <div>
+              <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-blue-500 to-indigo-600 text-white flex items-center justify-center mb-5 shadow-md shadow-blue-500/20 group-hover:scale-110 transition-transform">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+              </div>
+              <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">PDF Page Organizer</h3>
+              <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed mb-6">
+                Organize your PDF documents easily. Reorder pages with drag and drop, rotate 90°, delete pages, extract selections, and merge multiple PDFs in-browser.
+              </p>
+              <div class="space-y-2 text-xs text-slate-500 dark:text-slate-400 mb-6">
+                <div class="flex items-center gap-2">✓ Visual PDF.js Page Previews</div>
+                <div class="flex items-center gap-2">✓ Drag &amp; Drop Reordering &amp; Rotation</div>
+                <div class="flex items-center gap-2">✓ Multi-PDF Merge &amp; Page Extraction</div>
+              </div>
+            </div>
+            <a href="#/pdf-organizer" class="w-full py-2.5 px-4 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 font-semibold text-sm text-center hover:bg-indigo-600 dark:hover:bg-indigo-500 dark:hover:text-white transition-colors flex items-center justify-center gap-2">
+              Open PDF Tool
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+            </a>
+          </div>
+
+          <!-- Tool Card 3: YouTube Description Formatter -->
+          <div class="tool-card group bg-white dark:bg-slate-900 rounded-2xl p-6 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-xl hover:border-indigo-400 dark:hover:border-indigo-500 transition-all flex flex-col justify-between" data-tool-name="youtube description formatter timestamps chapters video hashtags">
+            <div>
+              <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-red-500 to-amber-500 text-white flex items-center justify-center mb-5 shadow-md shadow-red-500/20 group-hover:scale-110 transition-transform">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+              </div>
+              <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">YouTube Description Formatter</h3>
+              <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed mb-6">
+                Format engaging YouTube video descriptions, organize interactive timestamps and chapters, build clean hashtag clusters, and format social media links.
+              </p>
+              <div class="space-y-2 text-xs text-slate-500 dark:text-slate-400 mb-6">
+                <div class="flex items-center gap-2">✓ Automatic YouTube Chapter Validator</div>
+                <div class="flex items-center gap-2">✓ 5,000 Character YouTube Limit Monitor</div>
+                <div class="flex items-center gap-2">✓ 1-Click Copy &amp; TXT File Export</div>
+              </div>
+            </div>
+            <a href="#/youtube-formatter" class="w-full py-2.5 px-4 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 font-semibold text-sm text-center hover:bg-indigo-600 dark:hover:bg-indigo-500 dark:hover:text-white transition-colors flex items-center justify-center gap-2">
+              Open YouTube Tool
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+            </a>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- AD PLACEMENT 2: Homepage Middle (728x90 Leaderboard) -->
+      <section class="max-w-5xl mx-auto px-4 sm:px-6 my-6">
+        <div class="flex flex-col items-center justify-center p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm text-center">
+          <div class="flex items-center justify-between w-full max-w-[728px] text-[10px] text-slate-400 font-mono mb-2 uppercase tracking-wider">
+            <span>Sponsored Content</span>
+            <span>728 × 90 Leaderboard</span>
+          </div>
+          <div class="overflow-x-auto max-w-full flex justify-center py-1">
+            <div class="min-w-[728px] h-[90px] overflow-hidden flex items-center justify-center bg-slate-50 dark:bg-slate-950/50 rounded-xl">
+              <iframe srcdoc="<!DOCTYPE html><html><head><meta charset='UTF-8'><style>body{margin:0;padding:0;display:flex;justify-content:center;align-items:center;background:transparent;overflow:hidden;}</style></head><body><script type='text/javascript'>atOptions = { 'key' : 'ee1f4ca0f69d5a2618bd750e86a5106c', 'format' : 'iframe', 'height' : 90, 'width' : 728, 'params' : {} };</script><script type='text/javascript' src='https://bauval.org/22/ee1f4ca0f69d5a2618bd750e86a5106c'></script></body></html>" width="728" height="90" frameborder="0" scrolling="no" style="border:none;overflow:hidden;display:block;"></iframe>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- HOW IT WORKS SECTION -->
+      <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-slate-200/80 dark:border-slate-800/80">
+        <div class="text-center max-w-3xl mx-auto mb-16">
+          <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400 tracking-wider uppercase">Step-by-Step Guidance</span>
+          <h2 class="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white mt-1">How Creator Tools Hub Works</h2>
+          <p class="mt-3 text-slate-600 dark:text-slate-400 text-sm sm:text-base">
+            All operations run directly inside your modern web browser using HTML5 Canvas, File API, and WebAssembly. No data ever reaches a remote server.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <!-- Step 1 -->
+          <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 relative">
+            <span class="text-3xl font-black text-indigo-100 dark:text-slate-800 absolute top-4 right-4">01</span>
+            <div class="text-xs font-bold text-indigo-600 dark:text-indigo-400 mb-1">IMAGE OPTIMIZATION</div>
+            <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-3">Instagram Image Resizing</h3>
+            <p class="text-slate-600 dark:text-slate-300 text-xs sm:text-sm leading-relaxed">
+              Drop any photo into the converter, select the exact Instagram aspect ratio (such as 4:5 Portrait or 1:1 Square), position your crop or enable blurred fill borders, adjust compression, and download instantly.
+            </p>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 relative">
+            <span class="text-3xl font-black text-indigo-100 dark:text-slate-800 absolute top-4 right-4">02</span>
+            <div class="text-xs font-bold text-indigo-600 dark:text-indigo-400 mb-1">DOCUMENT REORGANIZATION</div>
+            <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-3">PDF Management &amp; Merging</h3>
+            <p class="text-slate-600 dark:text-slate-300 text-xs sm:text-sm leading-relaxed">
+              Upload single or multiple PDF documents. Watch real page thumbnails render in seconds. Rearrange pages by dragging them, rotate upside-down pages, delete unwanted pages, and export your organized PDF.
+            </p>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 relative">
+            <span class="text-3xl font-black text-indigo-100 dark:text-slate-800 absolute top-4 right-4">03</span>
+            <div class="text-xs font-bold text-indigo-600 dark:text-indigo-400 mb-1">METADATA &amp; SEO</div>
+            <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-3">YouTube Formatting &amp; Chapters</h3>
+            <p class="text-slate-600 dark:text-slate-300 text-xs sm:text-sm leading-relaxed">
+              Structure your video description with timestamps formatted to YouTube's exact chapter requirements. Combine keywords into hashtags and arrange your socials with a live preview before copying or downloading as TXT.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- FEATURES SECTION -->
+      <section class="bg-white dark:bg-slate-900/60 border-y border-slate-200 dark:border-slate-800 py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="text-center max-w-2xl mx-auto mb-12">
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">Why Creators Choose Our Hub</h2>
+            <p class="mt-2 text-slate-600 dark:text-slate-400 text-sm">Engineered for speed, privacy, and zero-friction creator workflows.</p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900">
+              <div class="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold mb-3">✓</div>
+              <h4 class="font-bold text-slate-900 dark:text-white text-base">Free Browser-Based Processing</h4>
+              <p class="text-slate-600 dark:text-slate-400 text-xs mt-1">No monthly subscription fees, paywalls, or export limits. All tools are 100% free.</p>
+            </div>
+
+            <div class="p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900">
+              <div class="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold mb-3">🔒</div>
+              <h4 class="font-bold text-slate-900 dark:text-white text-base">100% Client-Side Privacy</h4>
+              <p class="text-slate-600 dark:text-slate-400 text-xs mt-1">Files never leave your machine. Your private photos, PDFs, and scripts stay completely on your device.</p>
+            </div>
+
+            <div class="p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900">
+              <div class="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold mb-3">⚡</div>
+              <h4 class="font-bold text-slate-900 dark:text-white text-base">Zero Account Registration</h4>
+              <p class="text-slate-600 dark:text-slate-400 text-xs mt-1">No sign-up emails, passwords, or verifications. Open any tool and get to work in seconds.</p>
+            </div>
+
+            <div class="p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900">
+              <div class="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold mb-3">📱</div>
+              <h4 class="font-bold text-slate-900 dark:text-white text-base">Mobile-Responsive Interfaces</h4>
+              <p class="text-slate-600 dark:text-slate-400 text-xs mt-1">Engineered to work seamlessly across smartphones, tablets, laptops, and ultra-wide desktop displays.</p>
+            </div>
+
+            <div class="p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900">
+              <div class="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold mb-3">⏱</div>
+              <h4 class="font-bold text-slate-900 dark:text-white text-base">Real-Time Validation</h4>
+              <p class="text-slate-600 dark:text-slate-400 text-xs mt-1">Immediate feedback on YouTube timestamps, character constraints, and image resolution calculations.</p>
+            </div>
+
+            <div class="p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900">
+              <div class="w-8 h-8 rounded-lg bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center font-bold mb-3">🚀</div>
+              <h4 class="font-bold text-slate-900 dark:text-white text-base">Instant Downloads</h4>
+              <p class="text-slate-600 dark:text-slate-400 text-xs mt-1">No slow server queues or watermarks. Processed files save straight to your download folder.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- GENERAL FAQ SECTION -->
+      <section class="max-w-4xl mx-auto px-4 sm:px-6 py-16">
+        <div class="text-center mb-10">
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">Frequently Asked Questions</h2>
+          <p class="mt-2 text-slate-600 dark:text-slate-400 text-sm">Everything you need to know about our browser tools.</p>
+        </div>
+
+        <div class="space-y-4" id="faq-accordion">
+          <div class="border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 p-4 sm:p-5">
+            <h3 class="font-bold text-slate-900 dark:text-white text-sm sm:text-base">Are my photos and PDF files uploaded to any server?</h3>
+            <p class="mt-2 text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+              No. Never. Creator Tools Hub processes all files 100% locally on your device using the HTML5 File API, Canvas API, and modern WebAssembly libraries (PDF.js and pdf-lib). Your sensitive documents never leave your browser memory.
+            </p>
+          </div>
+
+          <div class="border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 p-4 sm:p-5">
+            <h3 class="font-bold text-slate-900 dark:text-white text-sm sm:text-base">Do I need to install software or register an account?</h3>
+            <p class="mt-2 text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+              No installation or account registration is needed. You can bookmark this single page and use all tools instantly on Chrome, Safari, Firefox, Edge, Android, or iOS.
+            </p>
+          </div>
+
+          <div class="border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 p-4 sm:p-5">
+            <h3 class="font-bold text-slate-900 dark:text-white text-sm sm:text-base">What image and document file formats are supported?</h3>
+            <p class="mt-2 text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+              The Instagram tool supports JPG, JPEG, PNG, and WebP images. The PDF Organizer accepts all standard PDF versions (1.3 through 2.0). The YouTube tool exports clean UTF-8 text (.txt) files.
+            </p>
+          </div>
+
+          <div class="border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 p-4 sm:p-5">
+            <h3 class="font-bold text-slate-900 dark:text-white text-sm sm:text-base">Can I save this entire website to use offline?</h3>
+            <p class="mt-2 text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+              Yes! Creator Tools Hub is constructed as a self-contained single HTML file. You can save `index.html` to your local hard drive or host it on any static web host such as GitHub Pages, Cloudflare Pages, or Netlify with zero server dependencies.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- AD PLACEMENT 3: Homepage Bottom Pre-Footer (320x50 Banner) -->
+      <section class="max-w-5xl mx-auto px-4 sm:px-6 mb-12">
+        <div class="flex flex-col items-center justify-center p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm text-center">
+          <div class="flex items-center justify-between w-full max-w-[320px] text-[10px] text-slate-400 font-mono mb-2 uppercase tracking-wider">
+            <span>Advertisement</span>
+            <span>320 × 50 Banner</span>
+          </div>
+          <div class="w-[320px] h-[50px] overflow-hidden flex items-center justify-center bg-slate-50 dark:bg-slate-950/50 rounded-xl">
+            <iframe srcdoc="<!DOCTYPE html><html><head><meta charset='UTF-8'><style>body{margin:0;padding:0;display:flex;justify-content:center;align-items:center;background:transparent;overflow:hidden;}</style></head><body><script type='text/javascript'>atOptions = { 'key' : 'a0cd91359b850c4b3efc05eab6619bb7', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };</script><script type='text/javascript' src='https://bauval.org/22/a0cd91359b850c4b3efc05eab6619bb7'></script></body></html>" width="320" height="50" frameborder="0" scrolling="no" style="border:none;overflow:hidden;display:block;"></iframe>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- ==================== 2. INSTAGRAM SIZE CONVERTER VIEW ==================== -->
+    <div id="view-instagram-tools" class="page-view">
+      
+      <!-- Tool Page Header -->
+      <div class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <div class="flex items-center gap-2 text-xs font-bold text-pink-600 dark:text-pink-400 uppercase tracking-wider mb-1">
+                <span>Image Utilities</span> <span>•</span> <span>Lossless Quality Presets</span>
+              </div>
+              <h1 class="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white">Instagram Size Converter</h1>
+              <p class="mt-1 text-slate-600 dark:text-slate-300 text-sm">
+                Crop, resize, fit, and compress photos with exact pixel dimensions for Instagram Posts, Stories, and Reels.
+              </p>
+            </div>
+            <div class="flex items-center gap-3">
+              <a href="#/" class="px-3 py-2 text-xs font-semibold rounded-lg border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 transition-colors">
+                ← Back to Home
+              </a>
+              <button id="ig-reset-btn" class="px-3 py-2 text-xs font-semibold rounded-lg bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors">
+                Reset Tool
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AD PLACEMENT: Above Instagram Tool (728x90 Leaderboard) -->
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 my-6">
+        <div class="flex flex-col items-center justify-center p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm text-center">
+          <div class="flex items-center justify-between w-full max-w-[728px] text-[10px] text-slate-400 font-mono mb-1 uppercase tracking-wider">
+            <span>Advertisement</span>
+            <span>728 × 90</span>
+          </div>
+          <div class="overflow-x-auto max-w-full flex justify-center py-1">
+            <div class="min-w-[728px] h-[90px] overflow-hidden flex items-center justify-center bg-slate-50 dark:bg-slate-950/50 rounded-xl">
+              <iframe srcdoc="<!DOCTYPE html><html><head><meta charset='UTF-8'><style>body{margin:0;padding:0;display:flex;justify-content:center;align-items:center;background:transparent;overflow:hidden;}</style></head><body><script type='text/javascript'>atOptions = { 'key' : 'ee1f4ca0f69d5a2618bd750e86a5106c', 'format' : 'iframe', 'height' : 90, 'width' : 728, 'params' : {} };</script><script type='text/javascript' src='https://bauval.org/22/ee1f4ca0f69d5a2618bd750e86a5106c'></script></body></html>" width="728" height="90" frameborder="0" scrolling="no" style="border:none;overflow:hidden;display:block;"></iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOOL INTERFACE -->
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          <!-- Left Control Panel (5 cols) -->
+          <div class="lg:col-span-5 space-y-6">
+            
+            <!-- Upload Box -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
+              <h2 class="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">1. Upload Image</h2>
+              
+              <div id="ig-dropzone" class="border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-pink-500 dark:hover:border-pink-400 rounded-xl p-6 text-center cursor-pointer transition-colors bg-slate-50/50 dark:bg-slate-950/40">
+                <input type="file" id="ig-file-input" accept="image/jpeg,image/png,image/webp" class="hidden" />
+                <div class="w-12 h-12 mx-auto rounded-full bg-pink-100 dark:bg-pink-950/60 text-pink-600 dark:text-pink-400 flex items-center justify-center mb-3">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                </div>
+                <p class="text-sm font-semibold text-slate-800 dark:text-slate-200">Drag &amp; drop an image here</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">or <span class="text-pink-600 dark:text-pink-400 font-medium underline">browse from your computer</span></p>
+                <p class="text-[11px] text-slate-400 mt-2">Supports JPG, PNG, WebP (Up to 50MB)</p>
+              </div>
+
+              <!-- Uploaded Metadata Info -->
+              <div id="ig-file-info" class="hidden mt-4 p-3 bg-slate-100 dark:bg-slate-800 rounded-xl text-xs flex items-center justify-between">
+                <div class="truncate mr-2">
+                  <span id="ig-file-name" class="font-bold text-slate-800 dark:text-slate-200 block truncate">sample.jpg</span>
+                  <span id="ig-file-dim" class="text-slate-500 dark:text-slate-400">3024 × 4032 px • 3.2 MB</span>
+                </div>
+                <button id="ig-remove-file-btn" class="text-rose-500 hover:text-rose-700 text-xs font-semibold shrink-0">Change</button>
+              </div>
+            </div>
+
+            <!-- Preset Dimensions -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+              <h2 class="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">2. Select Target Dimensions</h2>
+
+              <div class="grid grid-cols-2 gap-2.5">
+                <button type="button" class="ig-preset-btn active p-3 rounded-xl border text-left transition-all border-pink-500 bg-pink-50/50 dark:bg-pink-950/30 text-pink-700 dark:text-pink-300" data-width="1080" data-height="1080" data-name="Square Post">
+                  <div class="font-bold text-xs">Square Post (1:1)</div>
+                  <div class="text-[11px] opacity-75">1080 × 1080 px</div>
+                </button>
+
+                <button type="button" class="ig-preset-btn p-3 rounded-xl border border-slate-200 dark:border-slate-800 text-left transition-all hover:border-slate-300 dark:hover:border-slate-700 text-slate-700 dark:text-slate-300" data-width="1080" data-height="1350" data-name="Portrait Post">
+                  <div class="font-bold text-xs">Portrait Post (4:5)</div>
+                  <div class="text-[11px] opacity-75">1080 × 1350 px</div>
+                </button>
+
+                <button type="button" class="ig-preset-btn p-3 rounded-xl border border-slate-200 dark:border-slate-800 text-left transition-all hover:border-slate-300 dark:hover:border-slate-700 text-slate-700 dark:text-slate-300" data-width="1080" data-height="566" data-name="Landscape Post">
+                  <div class="font-bold text-xs">Landscape (1.91:1)</div>
+                  <div class="text-[11px] opacity-75">1080 × 566 px</div>
+                </button>
+
+                <button type="button" class="ig-preset-btn p-3 rounded-xl border border-slate-200 dark:border-slate-800 text-left transition-all hover:border-slate-300 dark:hover:border-slate-700 text-slate-700 dark:text-slate-300" data-width="1080" data-height="1920" data-name="Story / Reel">
+                  <div class="font-bold text-xs">Story / Reel (9:16)</div>
+                  <div class="text-[11px] opacity-75">1080 × 1920 px</div>
+                </button>
+              </div>
+
+              <!-- Custom Dimensions -->
+              <div class="pt-2">
+                <label class="flex items-center gap-2 cursor-pointer mb-2">
+                  <input type="checkbox" id="ig-custom-toggle" class="rounded text-pink-600 focus:ring-pink-500 w-4 h-4" />
+                  <span class="text-xs font-semibold text-slate-700 dark:text-slate-300">Custom Dimensions</span>
+                </label>
+                
+                <div id="ig-custom-inputs" class="grid grid-cols-2 gap-3 opacity-50 pointer-events-none transition-opacity">
+                  <div>
+                    <label class="block text-[11px] text-slate-500 mb-1">Width (px)</label>
+                    <input type="number" id="ig-custom-w" value="1080" min="100" max="4000" class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs" />
+                  </div>
+                  <div>
+                    <label class="block text-[11px] text-slate-500 mb-1">Height (px)</label>
+                    <input type="number" id="ig-custom-h" value="1080" min="100" max="4000" class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Fit & Position Controls -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+              <h2 class="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">3. Fit &amp; Framing Style</h2>
+              
+              <div class="grid grid-cols-2 gap-2">
+                <label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 cursor-pointer has-[:checked]:border-pink-500 has-[:checked]:bg-pink-50/40 dark:has-[:checked]:bg-pink-950/20">
+                  <input type="radio" name="ig-fit-mode" value="cover" checked class="text-pink-600 focus:ring-pink-500" />
+                  <div class="text-xs">
+                    <span class="font-bold block">Fill &amp; Crop</span>
+                    <span class="text-[10px] text-slate-500">Fill entire frame</span>
+                  </div>
+                </label>
+
+                <label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 cursor-pointer has-[:checked]:border-pink-500 has-[:checked]:bg-pink-50/40 dark:has-[:checked]:bg-pink-950/20">
+                  <input type="radio" name="ig-fit-mode" value="contain" class="text-pink-600 focus:ring-pink-500" />
+                  <div class="text-xs">
+                    <span class="font-bold block">Fit &amp; Pad</span>
+                    <span class="text-[10px] text-slate-500">No content cropped</span>
+                  </div>
+                </label>
+              </div>
+
+              <!-- Contain Background Selector (Shown when Fit & Pad is selected) -->
+              <div id="ig-contain-bg-box" class="hidden pt-2 space-y-2">
+                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300">Padding Background Style</label>
+                <div class="grid grid-cols-4 gap-2 text-xs">
+                  <label class="border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-center cursor-pointer has-[:checked]:border-pink-500 has-[:checked]:font-bold">
+                    <input type="radio" name="ig-bg-style" value="blur" checked class="sr-only" />
+                    <span>Blur Photo</span>
+                  </label>
+                  <label class="border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-center cursor-pointer has-[:checked]:border-pink-500 has-[:checked]:font-bold">
+                    <input type="radio" name="ig-bg-style" value="#ffffff" class="sr-only" />
+                    <span>White</span>
+                  </label>
+                  <label class="border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-center cursor-pointer has-[:checked]:border-pink-500 has-[:checked]:font-bold">
+                    <input type="radio" name="ig-bg-style" value="#000000" class="sr-only" />
+                    <span>Black</span>
+                  </label>
+                  <label class="border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-center cursor-pointer has-[:checked]:border-pink-500 has-[:checked]:font-bold">
+                    <input type="radio" name="ig-bg-style" value="custom" class="sr-only" />
+                    <span>Custom</span>
+                  </label>
+                </div>
+                <div id="ig-custom-color-row" class="hidden pt-1">
+                  <input type="color" id="ig-custom-bg-color" value="#4361ee" class="w-full h-8 rounded cursor-pointer" />
+                </div>
+              </div>
+
+              <!-- Crop Pan Sliders (Shown when Fill & Crop is selected) -->
+              <div id="ig-pan-box" class="space-y-3 pt-2">
+                <div>
+                  <div class="flex justify-between text-xs text-slate-600 dark:text-slate-400 mb-1">
+                    <span>Horizontal Position</span>
+                    <span id="ig-pan-x-val">Center (50%)</span>
+                  </div>
+                  <input type="range" id="ig-pan-x" min="0" max="100" value="50" class="w-full accent-pink-600" />
+                </div>
+                <div>
+                  <div class="flex justify-between text-xs text-slate-600 dark:text-slate-400 mb-1">
+                    <span>Vertical Position</span>
+                    <span id="ig-pan-y-val">Center (50%)</span>
+                  </div>
+                  <input type="range" id="ig-pan-y" min="0" max="100" value="50" class="w-full accent-pink-600" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Export Settings -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+              <h2 class="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">4. Export &amp; Compression</h2>
+
+              <div class="grid grid-cols-3 gap-2">
+                <label class="border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-center cursor-pointer has-[:checked]:border-pink-500 has-[:checked]:bg-pink-50/40 dark:has-[:checked]:bg-pink-950/20">
+                  <input type="radio" name="ig-format" value="jpeg" checked class="sr-only" />
+                  <span class="block font-bold text-xs">JPG</span>
+                  <span class="text-[10px] text-slate-400">Recommended</span>
+                </label>
+                <label class="border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-center cursor-pointer has-[:checked]:border-pink-500 has-[:checked]:bg-pink-50/40 dark:has-[:checked]:bg-pink-950/20">
+                  <input type="radio" name="ig-format" value="png" class="sr-only" />
+                  <span class="block font-bold text-xs">PNG</span>
+                  <span class="text-[10px] text-slate-400">Lossless</span>
+                </label>
+                <label class="border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-center cursor-pointer has-[:checked]:border-pink-500 has-[:checked]:bg-pink-50/40 dark:has-[:checked]:bg-pink-950/20">
+                  <input type="radio" name="ig-format" value="webp" class="sr-only" />
+                  <span class="block font-bold text-xs">WebP</span>
+                  <span class="text-[10px] text-slate-400">Modern Web</span>
+                </label>
+              </div>
+
+              <!-- Quality Slider (JPG & WebP) -->
+              <div id="ig-quality-box" class="pt-2">
+                <div class="flex justify-between text-xs text-slate-600 dark:text-slate-400 mb-1">
+                  <span>Image Quality (Compression)</span>
+                  <span id="ig-quality-val" class="font-bold text-slate-800 dark:text-slate-200">92% (High)</span>
+                </div>
+                <input type="range" id="ig-quality" min="10" max="100" value="92" class="w-full accent-pink-600" />
+                <div class="flex justify-between text-[10px] text-slate-400 mt-0.5">
+                  <span>Smaller File (10%)</span>
+                  <span>Balanced</span>
+                  <span>Max Quality (100%)</span>
+                </div>
+              </div>
+
+              <!-- Download Button -->
+              <button id="ig-download-btn" disabled class="w-full mt-4 py-3 px-6 rounded-xl bg-pink-600 hover:bg-pink-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-sm shadow-lg shadow-pink-600/25 transition-all flex items-center justify-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                Download Formatted Image
+              </button>
+            </div>
+
+          </div>
+
+          <!-- Right Live Canvas Preview Panel (7 cols) -->
+          <div class="lg:col-span-7 space-y-4">
+            
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
+              <div class="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800 mb-4">
+                <div class="flex items-center gap-2">
+                  <h3 class="font-bold text-slate-900 dark:text-white text-base">Live Preview</h3>
+                  <span id="ig-preview-badge" class="px-2 py-0.5 rounded text-[11px] font-semibold bg-pink-100 text-pink-700 dark:bg-pink-950 dark:text-pink-300">1080 × 1080</span>
+                </div>
+                
+                <!-- Toggle Before vs After -->
+                <div class="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg text-xs">
+                  <button id="ig-view-after-btn" class="px-2.5 py-1 rounded bg-white dark:bg-slate-700 text-slate-900 dark:text-white font-medium shadow-xs">Export Result</button>
+                  <button id="ig-view-before-btn" class="px-2.5 py-1 rounded text-slate-600 dark:text-slate-400 font-medium">Original</button>
+                </div>
+              </div>
+
+              <!-- Canvas / Image Stage Area -->
+              <div class="tool-canvas-container rounded-xl p-4 sm:p-8 flex items-center justify-center min-h-[380px] sm:min-h-[480px] border border-slate-200 dark:border-slate-800 overflow-hidden relative">
+                
+                <!-- Empty Placeholder -->
+                <div id="ig-empty-state" class="text-center p-8 max-w-sm">
+                  <div class="w-16 h-16 mx-auto rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center mb-4">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                  </div>
+                  <h4 class="font-bold text-slate-700 dark:text-slate-300">No Image Selected Yet</h4>
+                  <p class="text-xs text-slate-500 mt-1">Upload an image on the left to see the instant live preview with crop guides and export dimensions.</p>
+                  <button onclick="document.getElementById('ig-file-input').click()" class="mt-4 px-4 py-2 text-xs font-semibold rounded-lg bg-pink-600 text-white hover:bg-pink-700">
+                    Browse Sample Photo
+                  </button>
+                </div>
+
+                <!-- Live Canvas Display -->
+                <canvas id="ig-canvas" class="hidden max-h-[440px] max-w-full rounded shadow-md object-contain transition-all"></canvas>
+
+                <!-- Original Image Preview (Toggled by "Original") -->
+                <img id="ig-original-img" class="hidden max-h-[440px] max-w-full rounded shadow-md object-contain" alt="Original photo" />
+              </div>
+
+              <!-- Metrics bar -->
+              <div id="ig-metrics" class="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800 grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
+                <div>
+                  <span class="text-slate-400 block text-[11px]">Target Aspect:</span>
+                  <span id="ig-target-aspect" class="font-bold text-slate-700 dark:text-slate-300">1:1 Square</span>
+                </div>
+                <div>
+                  <span class="text-slate-400 block text-[11px]">Final Output Dimensions:</span>
+                  <span id="ig-target-dims" class="font-bold text-slate-700 dark:text-slate-300">1080 × 1080 px</span>
+                </div>
+                <div>
+                  <span class="text-slate-400 block text-[11px]">Estimated Output Size:</span>
+                  <span id="ig-est-size" class="font-bold text-pink-600 dark:text-pink-400">~ 280 KB</span>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- AD PLACEMENT: Immediately Below Instagram Tool -->
+        <div class="my-8 flex flex-col items-center justify-center p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm text-center">
+          <div class="flex items-center justify-between w-full max-w-[300px] text-[10px] text-slate-400 font-mono mb-2 uppercase tracking-wider">
+            <span>Sponsored</span>
+            <span>300 × 250</span>
+          </div>
+          <div class="w-[300px] h-[250px] overflow-hidden flex items-center justify-center bg-slate-50 dark:bg-slate-950/50 rounded-xl">
+            <iframe srcdoc="<!DOCTYPE html><html><head><meta charset='UTF-8'><style>body{margin:0;padding:0;display:flex;justify-content:center;align-items:center;background:transparent;overflow:hidden;}</style></head><body><script type='text/javascript'>atOptions = { 'key' : '8cf9a57bbf6a0b9e9fd8289b1260fcb0', 'format' : 'iframe', 'height' : 250, 'width' : 300, 'params' : {} };</script><script type='text/javascript' src='https://bauval.org/22/8cf9a57bbf6a0b9e9fd8289b1260fcb0'></script></body></html>" width="300" height="250" frameborder="0" scrolling="no" style="border:none;overflow:hidden;display:block;"></iframe>
+          </div>
+        </div>
+
+        <!-- DETAILED EDUCATIONAL CONTENT BELOW TOOL -->
+        <div class="mt-12 pt-8 border-t border-slate-200 dark:border-slate-800 max-w-4xl mx-auto space-y-12">
+          
+          <div>
+            <h2 class="text-2xl font-extrabold text-slate-900 dark:text-white mb-4">Complete Guide to Instagram Image Dimensions</h2>
+            <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed mb-4">
+              Posting images with incorrect aspect ratios or sub-optimal resolutions results in harsh compression, awkward automatic feed crops, and blurry rendering on mobile retina displays. Instagram's ingestion pipeline aggressively compresses photos that exceed its dimensional boundaries, while images that are too small get stretched and lose crispness.
+            </p>
+            <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
+              Our <strong>Instagram Size Converter</strong> processes your image locally using standard HTML5 Canvas high-fidelity bicubic interpolation. You have full control over the composition: choose between full-frame cropping with customizable focal centers, or letterbox padding using a stylish blurred background.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="p-5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+              <h3 class="font-bold text-slate-900 dark:text-white text-base mb-2">Why 1080px Width is the Gold Standard</h3>
+              <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                Instagram displays feed images at a maximum width of 1080 pixels. By exporting your photos at exactly 1080px wide with our optimized 90–95% quality setting, you bypass Instagram's server-side recompression algorithm, preserving maximum sharpness and color fidelity.
+              </p>
+            </div>
+            <div class="p-5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+              <h3 class="font-bold text-slate-900 dark:text-white text-base mb-2">The Power of Portrait 4:5 (1080 × 1350)</h3>
+              <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                Vertical 4:5 posts take up approximately 33% more vertical screen real-estate in the mobile feed than standard 1:1 squares. This increased screen footprint boosts thumb-stopping power, engagement, and dwell time on your content.
+              </p>
+            </div>
+          </div>
+
+          <!-- FAQ Specific to Instagram Tool -->
+          <div class="space-y-4">
+            <h3 class="text-xl font-bold text-slate-900 dark:text-white">Instagram Size Converter FAQ</h3>
+            
+            <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+              <h4 class="font-bold text-sm text-slate-900 dark:text-white">Which format should I choose: JPG, PNG, or WebP?</h4>
+              <p class="text-xs text-slate-600 dark:text-slate-400 mt-1">
+                For standard photos and portraits, <strong>JPG (Quality 90–92%)</strong> is recommended by Instagram for best compatibility and fast uploads. For illustrations, digital art, or typography with sharp edges, choose <strong>PNG</strong>.
+              </p>
+            </div>
+
+            <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+              <h4 class="font-bold text-sm text-slate-900 dark:text-white">How does "Fit &amp; Pad" with blurred background work?</h4>
+              <p class="text-xs text-slate-600 dark:text-slate-400 mt-1">
+                When you don't want any portion of your image cropped out (e.g. wide landscape photos intended for a 1:1 or 4:5 post), "Fit &amp; Pad" scales the entire image into the frame and fills the negative space with a soft, aesthetically pleasing blurred replica of your photo.
+              </p>
+            </div>
+
+            <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+              <h4 class="font-bold text-sm text-slate-900 dark:text-white">What is the ideal resolution for Instagram Stories and Reels?</h4>
+              <p class="text-xs text-slate-600 dark:text-slate-400 mt-1">
+                Both Stories and Reels require a 9:16 vertical aspect ratio with standard dimensions of <strong>1080 × 1920 pixels</strong>. Keep critical text and logos within the safe center zone to prevent them from being obscured by user handles or interface buttons.
+              </p>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- AD PLACEMENT: Below Instagram Tool (728x90 Leaderboard) -->
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 my-10">
+        <div class="flex flex-col items-center justify-center p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm text-center">
+          <div class="flex items-center justify-between w-full max-w-[728px] text-[10px] text-slate-400 font-mono mb-1 uppercase tracking-wider">
+            <span>Advertisement</span>
+            <span>728 × 90 Leaderboard</span>
+          </div>
+          <div class="overflow-x-auto max-w-full flex justify-center py-1">
+            <div class="min-w-[728px] h-[90px] overflow-hidden flex items-center justify-center bg-slate-50 dark:bg-slate-950/50 rounded-xl">
+              <iframe srcdoc="<!DOCTYPE html><html><head><meta charset='UTF-8'><style>body{margin:0;padding:0;display:flex;justify-content:center;align-items:center;background:transparent;overflow:hidden;}</style></head><body><script type='text/javascript'>atOptions = { 'key' : 'ee1f4ca0f69d5a2618bd750e86a5106c', 'format' : 'iframe', 'height' : 90, 'width' : 728, 'params' : {} };</script><script type='text/javascript' src='https://bauval.org/22/ee1f4ca0f69d5a2618bd750e86a5106c'></script></body></html>" width="728" height="90" frameborder="0" scrolling="no" style="border:none;overflow:hidden;display:block;"></iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ==================== 3. PDF PAGE ORGANIZER VIEW ==================== -->
+    <div id="view-pdf-organizer" class="page-view">
+      
+      <!-- Tool Page Header -->
+      <div class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <div class="flex items-center gap-2 text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-1">
+                <span>Document Workspace</span> <span>•</span> <span>Client-Side PDF Engine</span>
+              </div>
+              <h1 class="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white">PDF Page Organizer &amp; Merger</h1>
+              <p class="mt-1 text-slate-600 dark:text-slate-300 text-sm">
+                Rearrange pages with drag-and-drop, rotate orientations, delete pages, extract selections, and combine multiple PDF documents.
+              </p>
+            </div>
+            <div class="flex items-center gap-3">
+              <a href="#/" class="px-3 py-2 text-xs font-semibold rounded-lg border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 transition-colors">
+                ← Back to Home
+              </a>
+              <button id="pdf-reset-btn" class="px-3 py-2 text-xs font-semibold rounded-lg bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors">
+                Reset PDF Tool
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AD PLACEMENT: Above PDF Tool (728x90 Leaderboard) -->
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 my-6">
+        <div class="flex flex-col items-center justify-center p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm text-center">
+          <div class="flex items-center justify-between w-full max-w-[728px] text-[10px] text-slate-400 font-mono mb-1 uppercase tracking-wider">
+            <span>Advertisement</span>
+            <span>728 × 90</span>
+          </div>
+          <div class="overflow-x-auto max-w-full flex justify-center py-1">
+            <div class="min-w-[728px] h-[90px] overflow-hidden flex items-center justify-center bg-slate-50 dark:bg-slate-950/50 rounded-xl">
+              <iframe srcdoc="<!DOCTYPE html><html><head><meta charset='UTF-8'><style>body{margin:0;padding:0;display:flex;justify-content:center;align-items:center;background:transparent;overflow:hidden;}</style></head><body><script type='text/javascript'>atOptions = { 'key' : 'ee1f4ca0f69d5a2618bd750e86a5106c', 'format' : 'iframe', 'height' : 90, 'width' : 728, 'params' : {} };</script><script type='text/javascript' src='https://bauval.org/22/ee1f4ca0f69d5a2618bd750e86a5106c'></script></body></html>" width="728" height="90" frameborder="0" scrolling="no" style="border:none;overflow:hidden;display:block;"></iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOOL INTERFACE -->
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        
+        <!-- Upload & Multi-file Dropzone -->
+        <div id="pdf-upload-box" class="bg-white dark:bg-slate-900 rounded-2xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-sm text-center">
+          <div id="pdf-dropzone" class="border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-blue-500 dark:hover:border-blue-400 rounded-2xl p-8 cursor-pointer transition-colors bg-slate-50/50 dark:bg-slate-950/40 max-w-2xl mx-auto">
+            <input type="file" id="pdf-file-input" accept="application/pdf" multiple class="hidden" />
+            <div class="w-16 h-16 mx-auto rounded-2xl bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-4 shadow-sm">
+              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+            </div>
+            <h3 class="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-200">Drag &amp; drop PDF documents here</h3>
+            <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">or <span class="text-blue-600 dark:text-blue-400 font-semibold underline">browse multiple files from your computer</span></p>
+            <p class="text-[11px] text-slate-400 mt-2">Select 1 or more PDF files to merge and organize together. 100% private in-browser parsing.</p>
+          </div>
+        </div>
+
+        <!-- Processing Status Bar -->
+        <div id="pdf-loading-bar" class="hidden bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm text-center">
+          <div class="w-8 h-8 border-3 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+          <h4 id="pdf-loading-text" class="text-sm font-bold text-slate-800 dark:text-slate-200">Rendering PDF Page Thumbnails...</h4>
+          <p class="text-xs text-slate-500 mt-1">Processing pages directly in your browser memory.</p>
+        </div>
+
+        <!-- Working Toolbar & Actions (Shown once PDF is loaded) -->
+        <div id="pdf-workspace" class="hidden space-y-6">
+          
+          <!-- Toolbar Header -->
+          <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-5 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-wrap items-center justify-between gap-4">
+            
+            <!-- Left Info: Total Pages & Selection -->
+            <div class="flex items-center gap-3">
+              <span id="pdf-page-count-badge" class="px-3 py-1 rounded-lg bg-blue-50 text-blue-700 dark:bg-blue-950/70 dark:text-blue-300 text-xs font-bold">
+                0 Pages
+              </span>
+              <span id="pdf-selected-count" class="text-xs text-slate-500 dark:text-slate-400">
+                0 pages selected
+              </span>
+            </div>
+
+            <!-- Middle Batch Actions -->
+            <div class="flex flex-wrap items-center gap-2">
+              <button id="pdf-select-all-btn" class="px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300">
+                Select All
+              </button>
+              <button id="pdf-deselect-all-btn" class="px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300">
+                Deselect
+              </button>
+              <button id="pdf-rotate-all-btn" class="px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                Rotate All +90°
+              </button>
+              <button id="pdf-delete-selected-btn" class="px-3 py-1.5 text-xs font-medium rounded-lg text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 border border-rose-200 dark:border-rose-900/50">
+                Delete Selected
+              </button>
+              <button id="pdf-add-more-btn" class="px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center gap-1">
+                + Add More Files
+              </button>
+            </div>
+
+            <!-- Right Primary Actions: Extract & Download -->
+            <div class="flex items-center gap-2">
+              <button id="pdf-extract-btn" class="px-4 py-2 text-xs font-semibold rounded-xl bg-slate-800 text-white dark:bg-slate-700 hover:bg-slate-900 transition-colors">
+                Extract Selected
+              </button>
+              <button id="pdf-download-btn" class="px-5 py-2 text-xs font-bold rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-600/25 transition-all flex items-center gap-1.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                Download Organized PDF
+              </button>
+            </div>
+
+          </div>
+
+          <!-- Page Cards Grid (Draggable) -->
+          <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm min-h-[300px]">
+            <div class="flex items-center justify-between mb-4 text-xs text-slate-500 dark:text-slate-400">
+              <span>💡 Drag cards to reorder pages, or use the Left/Right arrows on touch devices.</span>
+              <span id="pdf-file-list-preview" class="font-mono text-[11px] truncate max-w-xs"></span>
+            </div>
+
+            <div id="pdf-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              <!-- Dynamically populated page cards -->
+            </div>
+          </div>
+
+        </div>
+
+        <!-- AD PLACEMENT: Immediately Below PDF Tool -->
+        <div class="my-8 flex flex-col items-center justify-center p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm text-center">
+          <div class="flex items-center justify-between w-full max-w-[300px] text-[10px] text-slate-400 font-mono mb-2 uppercase tracking-wider">
+            <span>Sponsored</span>
+            <span>300 × 250</span>
+          </div>
+          <div class="w-[300px] h-[250px] overflow-hidden flex items-center justify-center bg-slate-50 dark:bg-slate-950/50 rounded-xl">
+            <iframe srcdoc="<!DOCTYPE html><html><head><meta charset='UTF-8'><style>body{margin:0;padding:0;display:flex;justify-content:center;align-items:center;background:transparent;overflow:hidden;}</style></head><body><script type='text/javascript'>atOptions = { 'key' : '8cf9a57bbf6a0b9e9fd8289b1260fcb0', 'format' : 'iframe', 'height' : 250, 'width' : 300, 'params' : {} };</script><script type='text/javascript' src='https://bauval.org/22/8cf9a57bbf6a0b9e9fd8289b1260fcb0'></script></body></html>" width="300" height="250" frameborder="0" scrolling="no" style="border:none;overflow:hidden;display:block;"></iframe>
+          </div>
+        </div>
+
+        <!-- DETAILED EDUCATIONAL CONTENT BELOW TOOL -->
+        <div class="mt-16 pt-12 border-t border-slate-200 dark:border-slate-800 max-w-4xl mx-auto space-y-10">
+          <div>
+            <h2 class="text-2xl font-extrabold text-slate-900 dark:text-white mb-3">Professional Browser PDF Reorganization</h2>
+            <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed mb-4">
+              Traditionally, organizing and merging PDF files required either expensive desktop licenses or uploading sensitive contracts, invoices, and resumes to third-party web services. Creator Tools Hub solves this problem by executing all PDF rendering and page assembly operations directly in your web browser.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
+            <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+              <h3 class="font-bold text-slate-900 dark:text-white mb-2">1. Visual Reordering</h3>
+              <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                Click and drag any page thumbnail to its desired destination. The final document will compile in your exact sequence without loss of vector clarity or text layers.
+              </p>
+            </div>
+            <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+              <h3 class="font-bold text-slate-900 dark:text-white mb-2">2. Independent Rotations</h3>
+              <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                Fix sideways scanned pages with one-click 90-degree clockwise or counter-clockwise rotation buttons. The rotation metadata is saved permanently into the output PDF.
+              </p>
+            </div>
+            <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+              <h3 class="font-bold text-slate-900 dark:text-white mb-2">3. Merge &amp; Extract</h3>
+              <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                Combine pages across multiple uploaded PDF files into a single unified file, or check specific pages to extract them into an independent document.
+              </p>
+            </div>
+          </div>
+
+          <!-- FAQ Specific to PDF Tool -->
+          <div class="space-y-4">
+            <h3 class="text-xl font-bold text-slate-900 dark:text-white">PDF Page Organizer FAQ</h3>
+            
+            <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+              <h4 class="font-bold text-sm text-slate-900 dark:text-white">Are my confidential PDF documents safe?</h4>
+              <p class="text-xs text-slate-600 dark:text-slate-400 mt-1">
+                Yes. Our application uses Mozilla's open-source PDF.js and pdf-lib. All byte parsing, canvas rendering, and PDF generation occur in your browser's private memory sandbox. No remote server ever receives your document bytes.
+              </p>
+            </div>
+
+            <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+              <h4 class="font-bold text-sm text-slate-900 dark:text-white">Does rearranging pages affect searchable text and vector graphics?</h4>
+              <p class="text-xs text-slate-600 dark:text-slate-400 mt-1">
+                No. Because we use pdf-lib for structural page copying, original vector lines, embedded fonts, and selectable text streams are preserved untouched in the generated PDF.
+              </p>
+            </div>
+
+            <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+              <h4 class="font-bold text-sm text-slate-900 dark:text-white">What is the maximum file size or page limit?</h4>
+              <p class="text-xs text-slate-600 dark:text-slate-400 mt-1">
+                Because processing occurs on your device, capacity is determined by your system's RAM. Most modern devices comfortably handle PDFs up to several hundred pages and 100MB+ in file size.
+              </p>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- AD PLACEMENT: Below PDF Tool (728x90 Leaderboard) -->
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 my-10">
+        <div class="flex flex-col items-center justify-center p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm text-center">
+          <div class="flex items-center justify-between w-full max-w-[728px] text-[10px] text-slate-400 font-mono mb-1 uppercase tracking-wider">
+            <span>Advertisement</span>
+            <span>728 × 90 Leaderboard</span>
+          </div>
+          <div class="overflow-x-auto max-w-full flex justify-center py-1">
+            <div class="min-w-[728px] h-[90px] overflow-hidden flex items-center justify-center bg-slate-50 dark:bg-slate-950/50 rounded-xl">
+              <iframe srcdoc="<!DOCTYPE html><html><head><meta charset='UTF-8'><style>body{margin:0;padding:0;display:flex;justify-content:center;align-items:center;background:transparent;overflow:hidden;}</style></head><body><script type='text/javascript'>atOptions = { 'key' : 'ee1f4ca0f69d5a2618bd750e86a5106c', 'format' : 'iframe', 'height' : 90, 'width' : 728, 'params' : {} };</script><script type='text/javascript' src='https://bauval.org/22/ee1f4ca0f69d5a2618bd750e86a5106c'></script></body></html>" width="728" height="90" frameborder="0" scrolling="no" style="border:none;overflow:hidden;display:block;"></iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ==================== 4. YOUTUBE DESCRIPTION FORMATTER VIEW ==================== -->
+    <div id="view-youtube-formatter" class="page-view">
+      
+      <!-- Tool Page Header -->
+      <div class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <div class="flex items-center gap-2 text-xs font-bold text-red-600 dark:text-red-400 uppercase tracking-wider mb-1">
+                <span>Video SEO Studio</span> <span>•</span> <span>Chapter &amp; Timestamp Builder</span>
+              </div>
+              <h1 class="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white">YouTube Description Formatter</h1>
+              <p class="mt-1 text-slate-600 dark:text-slate-300 text-sm">
+                Create structured YouTube descriptions with validated chapters, hashtags, social links, and live character limit tracking.
+              </p>
+            </div>
+            <div class="flex items-center gap-3">
+              <a href="#/" class="px-3 py-2 text-xs font-semibold rounded-lg border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 transition-colors">
+                ← Back to Home
+              </a>
+              <button id="yt-reset-btn" class="px-3 py-2 text-xs font-semibold rounded-lg bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors">
+                Reset Editor
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AD PLACEMENT: Above YouTube Tool (728x90 Leaderboard) -->
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 my-6">
+        <div class="flex flex-col items-center justify-center p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm text-center">
+          <div class="flex items-center justify-between w-full max-w-[728px] text-[10px] text-slate-400 font-mono mb-1 uppercase tracking-wider">
+            <span>Advertisement</span>
+            <span>728 × 90</span>
+          </div>
+          <div class="overflow-x-auto max-w-full flex justify-center py-1">
+            <div class="min-w-[728px] h-[90px] overflow-hidden flex items-center justify-center bg-slate-50 dark:bg-slate-950/50 rounded-xl">
+              <iframe srcdoc="<!DOCTYPE html><html><head><meta charset='UTF-8'><style>body{margin:0;padding:0;display:flex;justify-content:center;align-items:center;background:transparent;overflow:hidden;}</style></head><body><script type='text/javascript'>atOptions = { 'key' : 'ee1f4ca0f69d5a2618bd750e86a5106c', 'format' : 'iframe', 'height' : 90, 'width' : 728, 'params' : {} };</script><script type='text/javascript' src='https://bauval.org/22/ee1f4ca0f69d5a2618bd750e86a5106c'></script></body></html>" width="728" height="90" frameborder="0" scrolling="no" style="border:none;overflow:hidden;display:block;"></iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOOL INTERFACE -->
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          <!-- Left Configuration Form (7 cols) -->
+          <div class="lg:col-span-7 space-y-6">
+            
+            <!-- Quick Preset Template Bar -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-wrap items-center justify-between gap-2">
+              <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Quick Templates:</span>
+              <div class="flex flex-wrap items-center gap-2">
+                <button type="button" class="yt-template-btn px-2.5 py-1 text-xs rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800" data-template="standard">Standard Creator</button>
+                <button type="button" class="yt-template-btn px-2.5 py-1 text-xs rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800" data-template="tutorial">Tech / Tutorial</button>
+                <button type="button" class="yt-template-btn px-2.5 py-1 text-xs rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800" data-template="podcast">Podcast / Interview</button>
+                <button type="button" class="yt-template-btn px-2.5 py-1 text-xs rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800" data-template="gaming">Gaming</button>
+              </div>
+            </div>
+
+            <!-- Video Title & Intro -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+              <div>
+                <div class="flex justify-between items-center mb-1">
+                  <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">Video Title (Reference)</label>
+                  <span id="yt-title-count" class="text-[11px] text-slate-400">0 / 100</span>
+                </div>
+                <input type="text" id="yt-title-input" placeholder="e.g. How to Build Clean Browser Apps with Zero Backend (Complete Guide)" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-red-500" maxlength="100" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">About This Video (Intro Paragraph)</label>
+                <textarea id="yt-intro-input" rows="4" placeholder="Hook your viewer in the first 2 lines! Briefly explain what viewers will learn in this video and why they should watch until the end..." class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"></textarea>
+              </div>
+            </div>
+
+            <!-- Timestamps & Chapters Formatter -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">Timestamps &amp; YouTube Chapters</h3>
+                  <p class="text-[11px] text-slate-500">YouTube rules: First timestamp must be 00:00 with at least 3 chapters.</p>
+                </div>
+                <button type="button" id="yt-add-sample-timestamps" class="text-xs text-red-600 dark:text-red-400 hover:underline font-semibold">Load Sample</button>
+              </div>
+
+              <!-- Chapter List Container -->
+              <div id="yt-chapters-list" class="space-y-2">
+                <!-- Dynamically populated rows -->
+              </div>
+
+              <div class="flex items-center justify-between pt-2">
+                <button type="button" id="yt-add-chapter-btn" class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1">
+                  + Add Timestamp Row
+                </button>
+                <div id="yt-chapter-status" class="text-xs font-medium text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                  <span>✓ Valid Chapters</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Social Media & Contact Links -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+              <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">Social Media &amp; Community Links</h3>
+              
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-[11px] text-slate-500 mb-1">Instagram</label>
+                  <input type="text" id="yt-social-ig" placeholder="@yourhandle or URL" class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs" />
+                </div>
+                <div>
+                  <label class="block text-[11px] text-slate-500 mb-1">X / Twitter</label>
+                  <input type="text" id="yt-social-x" placeholder="@yourhandle or URL" class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs" />
+                </div>
+                <div>
+                  <label class="block text-[11px] text-slate-500 mb-1">Website / Portfolio</label>
+                  <input type="text" id="yt-social-web" placeholder="https://yourwebsite.com" class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs" />
+                </div>
+                <div>
+                  <label class="block text-[11px] text-slate-500 mb-1">Discord / Community</label>
+                  <input type="text" id="yt-social-discord" placeholder="https://discord.gg/..." class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Hashtag Section -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+              <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">Hashtags Builder</h3>
+              
+              <div class="flex gap-2">
+                <input type="text" id="yt-hashtag-input" placeholder="Type keyword (e.g. CreatorTools, WebDesign) and press Enter" class="flex-grow px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs focus:ring-2 focus:ring-red-500" />
+                <button type="button" id="yt-add-hashtag-btn" class="px-4 py-2 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-xs font-bold shrink-0">
+                  Add #
+                </button>
+              </div>
+
+              <div id="yt-hashtag-badges" class="flex flex-wrap gap-1.5 min-h-[32px] p-2 rounded-xl bg-slate-50 dark:bg-slate-950/40 border border-slate-200 dark:border-slate-800">
+                <!-- Tag pills with click to remove -->
+              </div>
+              <p class="text-[11px] text-slate-400">Tip: YouTube officially recommends 3 to 5 targeted hashtags. More than 60 causes YouTube to ignore all tags.</p>
+            </div>
+
+            <!-- Extra Custom Headings & Disclaimers -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+              <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">Additional Sections &amp; Disclaimers</h3>
+
+              <div>
+                <label class="block text-[11px] text-slate-500 mb-1">Gear / Resources Mentioned</label>
+                <textarea id="yt-gear-input" rows="2" placeholder="Camera: Sony A7IV&#10;Mic: Shure SM7B&#10;Software: Creator Tools Hub" class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs"></textarea>
+              </div>
+
+              <div>
+                <label class="block text-[11px] text-slate-500 mb-1">Affiliate / Sponsorship Disclaimer</label>
+                <input type="text" id="yt-disclaimer-input" value="Some links above are affiliate links. If you purchase through them, I may earn a small commission at no additional cost to you." class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs" />
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Right Live Output & Actions (5 cols) -->
+          <div class="lg:col-span-5 space-y-4 sticky top-20">
+            
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+              
+              <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+                <div>
+                  <h3 class="font-bold text-slate-900 dark:text-white text-base">Live Description Preview</h3>
+                  <span class="text-xs text-slate-500">Ready to copy into YouTube Studio</span>
+                </div>
+                <div class="text-right">
+                  <span id="yt-char-count" class="font-mono text-xs font-bold text-slate-700 dark:text-slate-300">0</span>
+                  <span class="text-[11px] text-slate-400"> / 5000</span>
+                </div>
+              </div>
+
+              <!-- Character Progress Bar -->
+              <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                <div id="yt-char-progress" class="bg-red-500 h-full w-[0%] transition-all"></div>
+              </div>
+
+              <!-- Formatted Description Textarea (Monospace) -->
+              <textarea id="yt-output-preview" readonly rows="16" class="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-950 font-mono text-xs text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-800 focus:outline-none leading-relaxed resize-y select-all"></textarea>
+
+              <!-- Action Buttons -->
+              <div class="grid grid-cols-2 gap-3 pt-2">
+                <button id="yt-copy-btn" class="w-full py-3 px-4 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow-md shadow-red-600/20 transition-all flex items-center justify-center gap-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                  Copy Description
+                </button>
+                <button id="yt-download-txt-btn" class="w-full py-3 px-4 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 hover:bg-slate-800 font-bold text-xs transition-colors flex items-center justify-center gap-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                  Download TXT
+                </button>
+              </div>
+
+              <!-- Toast notification -->
+              <div id="yt-copy-toast" class="hidden p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 text-xs text-center font-semibold">
+                ✓ Copied to clipboard! Paste directly into YouTube Studio.
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- AD PLACEMENT: Immediately Below YouTube Tool -->
+        <div class="my-8 flex flex-col items-center justify-center p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm text-center">
+          <div class="flex items-center justify-between w-full max-w-[300px] text-[10px] text-slate-400 font-mono mb-2 uppercase tracking-wider">
+            <span>Sponsored</span>
+            <span>300 × 250</span>
+          </div>
+          <div class="w-[300px] h-[250px] overflow-hidden flex items-center justify-center bg-slate-50 dark:bg-slate-950/50 rounded-xl">
+            <iframe srcdoc="<!DOCTYPE html><html><head><meta charset='UTF-8'><style>body{margin:0;padding:0;display:flex;justify-content:center;align-items:center;background:transparent;overflow:hidden;}</style></head><body><script type='text/javascript'>atOptions = { 'key' : '8cf9a57bbf6a0b9e9fd8289b1260fcb0', 'format' : 'iframe', 'height' : 250, 'width' : 300, 'params' : {} };</script><script type='text/javascript' src='https://bauval.org/22/8cf9a57bbf6a0b9e9fd8289b1260fcb0'></script></body></html>" width="300" height="250" frameborder="0" scrolling="no" style="border:none;overflow:hidden;display:block;"></iframe>
+          </div>
+        </div>
+
+        <!-- DETAILED EDUCATIONAL CONTENT BELOW TOOL -->
+        <div class="mt-16 pt-12 border-t border-slate-200 dark:border-slate-800 max-w-4xl mx-auto space-y-10">
+          <div>
+            <h2 class="text-2xl font-extrabold text-slate-900 dark:text-white mb-3">Maximizing Video SEO with Formatted Descriptions</h2>
+            <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed mb-4">
+              Your YouTube video description is one of the primary signals that YouTube and Google search algorithms use to index your content. A haphazardly formatted description wastes valuable keyword equity and confuses both viewers and search spiders.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+            <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+              <h3 class="font-bold text-slate-900 dark:text-white mb-2">Google Search Rich Chapter Snippets</h3>
+              <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                When you include compliant timestamps (starting at 00:00 with at least 3 chapters of 10+ seconds duration), Google's search engine displays your video with interactive chapter scrub bars right on google.com search results, driving massive organic traffic.
+              </p>
+            </div>
+            <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+              <h3 class="font-bold text-slate-900 dark:text-white mb-2">The Above-the-Fold 2-Line Hook</h3>
+              <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                Only the first 100–120 characters are visible before the viewer clicks "...more". Place your primary value proposition and call to action in those opening sentences rather than burying links under massive text blocks.
+              </p>
+            </div>
+          </div>
+
+          <!-- FAQ Specific to YouTube Tool -->
+          <div class="space-y-4">
+            <h3 class="text-xl font-bold text-slate-900 dark:text-white">YouTube Description Formatter FAQ</h3>
+            
+            <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+              <h4 class="font-bold text-sm text-slate-900 dark:text-white">Why is 00:00 mandatory for YouTube chapters?</h4>
+              <p class="text-xs text-slate-600 dark:text-slate-400 mt-1">
+                YouTube's automated chaptering system strictly requires the first chapter to be set to 00:00 (or 0:00). If the first timestamp starts at any other second (such as 00:15), YouTube will treat timestamps as plain text and will not generate interactive scrub bar chapters.
+              </p>
+            </div>
+
+            <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+              <h4 class="font-bold text-sm text-slate-900 dark:text-white">What is YouTube's maximum character limit?</h4>
+              <p class="text-xs text-slate-600 dark:text-slate-400 mt-1">
+                YouTube allows up to 5,000 characters per description. Our editor provides a live character progress bar that turns red if you approach or exceed this hard constraint.
+              </p>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- AD PLACEMENT: Below YouTube Tool (728x90 Leaderboard) -->
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 my-10">
+        <div class="flex flex-col items-center justify-center p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm text-center">
+          <div class="flex items-center justify-between w-full max-w-[728px] text-[10px] text-slate-400 font-mono mb-1 uppercase tracking-wider">
+            <span>Advertisement</span>
+            <span>728 × 90 Leaderboard</span>
+          </div>
+          <div class="overflow-x-auto max-w-full flex justify-center py-1">
+            <div class="min-w-[728px] h-[90px] overflow-hidden flex items-center justify-center bg-slate-50 dark:bg-slate-950/50 rounded-xl">
+              <iframe srcdoc="<!DOCTYPE html><html><head><meta charset='UTF-8'><style>body{margin:0;padding:0;display:flex;justify-content:center;align-items:center;background:transparent;overflow:hidden;}</style></head><body><script type='text/javascript'>atOptions = { 'key' : 'ee1f4ca0f69d5a2618bd750e86a5106c', 'format' : 'iframe', 'height' : 90, 'width' : 728, 'params' : {} };</script><script type='text/javascript' src='https://bauval.org/22/ee1f4ca0f69d5a2618bd750e86a5106c'></script></body></html>" width="728" height="90" frameborder="0" scrolling="no" style="border:none;overflow:hidden;display:block;"></iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ==================== 5. ABOUT PAGE ==================== -->
+    <div id="view-about" class="page-view">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 py-16">
+        <h1 class="text-3xl sm:text-5xl font-extrabold text-slate-900 dark:text-white mb-6">About Creator Tools Hub</h1>
+        <p class="text-lg text-slate-600 dark:text-slate-300 leading-relaxed mb-6">
+          Creator Tools Hub was founded on a simple conviction: essential everyday digital creation utilities should be fast, private, free, and accessible right in your web browser without paywalls or account creation.
+        </p>
+
+        <div class="space-y-6 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+          <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800">
+            <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Our Privacy-First Architecture</h2>
+            <p>
+              Unlike legacy online utility websites that upload your personal documents and copyrighted images to centralized cloud servers for background processing, Creator Tools Hub operates 100% locally on your machine.
+            </p>
+            <p class="mt-2">
+              Using modern web standards—including HTML5 Canvas, the File and FileReader APIs, and WebAssembly compilation via PDF.js and pdf-lib—your files are processed inside your device's memory. No file is ever transmitted to an external server.
+            </p>
+          </div>
+
+          <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800">
+            <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Free &amp; Open Web Standards</h2>
+            <p>
+              We believe in sustainable, non-intrusive software. Creator Tools Hub is funded through standard Google AdSense display advertising, ensuring all tools remain completely free for indie creators, students, small businesses, and professional agencies.
+            </p>
+          </div>
+        </div>
+
+        <div class="mt-8 text-center">
+          <a href="#/" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-600 text-white font-semibold text-sm hover:bg-indigo-700">
+            ← Explore the Tools
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== 6. CONTACT PAGE ==================== -->
+    <div id="view-contact" class="page-view">
+      <div class="max-w-3xl mx-auto px-4 sm:px-6 py-16">
+        <h1 class="text-3xl sm:text-5xl font-extrabold text-slate-900 dark:text-white mb-4">Contact Us</h1>
+        <p class="text-slate-600 dark:text-slate-300 text-sm mb-8">
+          Have feedback, a tool suggestion, or an advertising inquiry? Reach out to our team using the form below.
+        </p>
+
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-sm">
+          <form id="contact-form" class="space-y-4">
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">Your Full Name</label>
+              <input type="text" id="contact-name" required placeholder="Jane Doe" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-indigo-500" />
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">Email Address</label>
+              <input type="email" id="contact-email" required placeholder="jane@example.com" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-indigo-500" />
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">Subject</label>
+              <select id="contact-subject" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-indigo-500">
+                <option value="General Feedback">General Feedback</option>
+                <option value="Feature Request">Feature Request</option>
+                <option value="Bug Report">Bug Report</option>
+                <option value="Advertising & Sponsorship">Advertising &amp; Sponsorship</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">Message</label>
+              <textarea id="contact-message" required rows="5" placeholder="Tell us how we can help or what features you would love to see..." class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-indigo-500"></textarea>
+            </div>
+
+            <p class="text-[11px] text-slate-400">
+              * Note: In this standalone browser edition, form submissions are validated locally and simulate client confirmation. Connect your preferred backend or email webhook (e.g. Formspree or EmailJS) for live email delivery.
+            </p>
+
+            <button type="submit" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md shadow-indigo-600/25 transition-all">
+              Send Message
+            </button>
+          </form>
+
+          <div id="contact-success" class="hidden mt-4 p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200 text-sm text-center">
+            🎉 Thank you for reaching out! Your message was received and validated.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== 7. PRIVACY POLICY ==================== -->
+    <div id="view-privacy-policy" class="page-view">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 py-16 prose dark:prose-invert">
+        <h1 class="text-3xl sm:text-5xl font-extrabold text-slate-900 dark:text-white mb-6">Privacy Policy</h1>
+        <p class="text-xs text-slate-400">Effective Date: November 2026</p>
+        
+        <div class="mt-6 space-y-6 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+          <section>
+            <h2 class="text-lg font-bold text-slate-900 dark:text-white">1. Client-Side Only Data Processing</h2>
+            <p>
+              Creator Tools Hub ("we", "our") does NOT upload, store, or transmit your uploaded files (including images, photos, PDF documents, or text descriptions) to any external server. All image resizing, canvas modifications, PDF rotations, and text formatting occur locally within your browser sandbox.
+            </p>
+          </section>
+
+          <section>
+            <h2 class="text-lg font-bold text-slate-900 dark:text-white">2. Local Storage</h2>
+            <p>
+              We utilize your browser's `localStorage` solely to remember your chosen theme preference (Light or Dark mode). No personally identifiable information (PII) is recorded in local storage.
+            </p>
+          </section>
+
+          <section>
+            <h2 class="text-lg font-bold text-slate-900 dark:text-white">3. Advertising &amp; Cookies (Google AdSense)</h2>
+            <p>
+              To maintain our tools completely free of charge, third-party vendors, including Google, use cookies to serve ads based on a user's prior visits to this website or other websites. Google's use of advertising cookies enables it and its partners to serve ads to users based on their visit to our site and/or other sites on the Internet.
+            </p>
+            <p class="mt-2">
+              Users may opt out of personalized advertising by visiting Google Ad Settings (<a href="https://www.google.com/settings/ads" target="_blank" rel="noopener" class="text-indigo-600 underline">google.com/settings/ads</a>).
+            </p>
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== 8. TERMS & CONDITIONS ==================== -->
+    <div id="view-terms" class="page-view">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 py-16">
+        <h1 class="text-3xl sm:text-5xl font-extrabold text-slate-900 dark:text-white mb-6">Terms and Conditions</h1>
+        <p class="text-xs text-slate-400">Effective Date: November 2026</p>
+
+        <div class="mt-6 space-y-6 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+          <section>
+            <h2 class="text-lg font-bold text-slate-900 dark:text-white">1. Acceptance of Terms</h2>
+            <p>
+              By accessing and using Creator Tools Hub, you acknowledge and agree to comply with these Terms and Conditions. The services are provided "as is" and "as available" for lawful use only.
+            </p>
+          </section>
+
+          <section>
+            <h2 class="text-lg font-bold text-slate-900 dark:text-white">2. User Content &amp; Ownership</h2>
+            <p>
+              You retain 100% intellectual property ownership of all images, PDF files, and video metadata processed through our tools. Because we do not upload or store your files, we claim no rights, licenses, or warranties regarding user materials.
+            </p>
+          </section>
+
+          <section>
+            <h2 class="text-lg font-bold text-slate-900 dark:text-white">3. Disclaimer of Warranties</h2>
+            <p>
+              While we strive to ensure maximum accuracy and reliability across all browser engines, we make no express or implied warranties that the services will be error-free or uninterrupted. Users are advised to retain original copies of important documents prior to reorganization.
+            </p>
+          </section>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ==================== HOSTING INSTRUCTIONS MODAL ==================== -->
+  <div id="hosting-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 max-w-2xl w-full rounded-2xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+      <button id="close-hosting-modal" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+
+      <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">How to Host This Site Online for Free</h3>
+      <p class="text-xs text-slate-500 mb-6">Because this entire website is contained within one single HTML file, you can host it anywhere in under 60 seconds with zero server cost.</p>
+
+      <div class="space-y-4 text-xs sm:text-sm text-slate-600 dark:text-slate-300">
+        <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+          <h4 class="font-bold text-slate-900 dark:text-white mb-1">Option 1: GitHub Pages (Recommended)</h4>
+          <p>1. Create a free GitHub repository (e.g. `creator-tools-hub`).</p>
+          <p>2. Upload this `index.html` file to the root of the repository.</p>
+          <p>3. Go to <strong>Settings → Pages</strong>, set branch to `main`, and click Save. Your site is live worldwide with free SSL!</p>
+        </div>
+
+        <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+          <h4 class="font-bold text-slate-900 dark:text-white mb-1">Option 2: Cloudflare Pages / Netlify Drop</h4>
+          <p>1. Visit <a href="https://app.netlify.com/drop" target="_blank" rel="noopener" class="text-indigo-600 underline">app.netlify.com/drop</a>.</p>
+          <p>2. Drag and drop the folder containing your `index.html`.</p>
+          <p>3. Instant global deployment on Cloudflare or Netlify Edge CDN.</p>
+        </div>
+
+        <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+          <h4 class="font-bold text-slate-900 dark:text-white mb-1">Enabling Google AdSense</h4>
+          <p>Once your custom domain is connected, apply for Google AdSense. Upon approval, locate the AdSense placeholders inside `index.html` (search for `SPONSORED ADVERTISEMENT`) and paste your AdSense script and `data-ad-client` tags.</p>
+        </div>
+      </div>
+
+      <div class="mt-6 text-right">
+        <button id="close-hosting-modal-2" class="px-5 py-2.5 rounded-xl bg-indigo-600 text-white font-semibold text-xs hover:bg-indigo-700">
+          Got It, Thanks!
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-12 mt-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+        
+        <!-- Col 1: Brand -->
+        <div class="md:col-span-1">
+          <div class="flex items-center gap-2 mb-3">
+            <div class="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-sm">CT</div>
+            <span class="font-bold text-slate-900 dark:text-white">Creator Tools Hub</span>
+          </div>
+          <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+            Free, privacy-focused browser tools engineered for creators, marketers, and businesses worldwide.
+          </p>
+        </div>
+
+        <!-- Col 2: Tools -->
+        <div>
+          <h4 class="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white mb-3">Browser Tools</h4>
+          <ul class="space-y-2 text-xs text-slate-500 dark:text-slate-400">
+            <li><a href="#/instagram-tools" class="hover:text-indigo-600 dark:hover:text-indigo-400">Instagram Size Converter</a></li>
+            <li><a href="#/pdf-organizer" class="hover:text-indigo-600 dark:hover:text-indigo-400">PDF Page Organizer</a></li>
+            <li><a href="#/youtube-formatter" class="hover:text-indigo-600 dark:hover:text-indigo-400">YouTube Description Formatter</a></li>
+          </ul>
+        </div>
+
+        <!-- Col 3: Company & Information -->
+        <div>
+          <h4 class="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white mb-3">Information</h4>
+          <ul class="space-y-2 text-xs text-slate-500 dark:text-slate-400">
+            <li><a href="#/about" class="hover:text-indigo-600 dark:hover:text-indigo-400">About Us</a></li>
+            <li><a href="#/contact" class="hover:text-indigo-600 dark:hover:text-indigo-400">Contact Support</a></li>
+            <li><button id="open-hosting-modal" class="hover:text-indigo-600 dark:hover:text-indigo-400 text-left">Deploy / Host Free Guide</button></li>
+          </ul>
+        </div>
+
+        <!-- Col 4: Legal & Privacy -->
+        <div>
+          <h4 class="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white mb-3">Legal &amp; Privacy</h4>
+          <ul class="space-y-2 text-xs text-slate-500 dark:text-slate-400">
+            <li><a href="#/privacy-policy" class="hover:text-indigo-600 dark:hover:text-indigo-400">Privacy Policy</a></li>
+            <li><a href="#/terms" class="hover:text-indigo-600 dark:hover:text-indigo-400">Terms and Conditions</a></li>
+            <li><span class="inline-flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-medium">● 100% In-Browser Privacy</span></li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="pt-8 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
+        <p>&copy; 2026 Creator Tools Hub. All rights reserved. Built as a complete standalone single HTML file.</p>
+        <p>No backend servers • No cookies tracking files • Browser WebAssembly Engine</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ==================== APPLICATION LOGIC SCRIPT ==================== -->
+  <script>
+    /* ==========================================================================
+       1. ROUTING & NAVIGATION ENGINE (History & Hash API)
+       ========================================================================== */
+    const routes = {
+      '': 'view-home',
+      '/': 'view-home',
+      '#home': 'view-home',
+      '#/': 'view-home',
+      '#/instagram-tools': 'view-instagram-tools',
+      '#instagram-tools': 'view-instagram-tools',
+      '#/pdf-organizer': 'view-pdf-organizer',
+      '#pdf-organizer': 'view-pdf-organizer',
+      '#/youtube-formatter': 'view-youtube-formatter',
+      '#youtube-formatter': 'view-youtube-formatter',
+      '#/about': 'view-about',
+      '#about': 'view-about',
+      '#/contact': 'view-contact',
+      '#contact': 'view-contact',
+      '#/privacy-policy': 'view-privacy-policy',
+      '#privacy-policy': 'view-privacy-policy',
+      '#/terms': 'view-terms',
+      '#terms': 'view-terms',
+    };
+
+    function handleRoute() {
+      const hash = window.location.hash || '#/';
+      const targetViewId = routes[hash] || 'view-home';
+
+      document.querySelectorAll('.page-view').forEach(view => {
+        view.classList.remove('active');
+      });
+
+      const activeView = document.getElementById(targetViewId);
+      if (activeView) {
+        activeView.classList.add('active');
+      }
+
+      // Update Nav active indicator
+      document.querySelectorAll('.nav-link').forEach(link => {
+        const linkRoute = link.getAttribute('data-route');
+        if (
+          (hash.includes('instagram') && linkRoute === 'instagram-tools') ||
+          (hash.includes('pdf') && linkRoute === 'pdf-organizer') ||
+          (hash.includes('youtube') && linkRoute === 'youtube-formatter') ||
+          (hash.includes('about') && linkRoute === 'about') ||
+          (hash.includes('contact') && linkRoute === 'contact') ||
+          ((hash === '#/' || hash === '' || hash === '#home') && linkRoute === 'home')
+        ) {
+          link.classList.add('text-indigo-600', 'dark:text-indigo-400', 'font-bold');
+        } else {
+          link.classList.remove('text-indigo-600', 'dark:text-indigo-400', 'font-bold');
+        }
+      });
+
+      // Update Document Title dynamically
+      if (hash.includes('instagram')) {
+        document.title = 'Instagram Size Converter – Creator Tools Hub';
+      } else if (hash.includes('pdf')) {
+        document.title = 'PDF Page Organizer & Merger – Creator Tools Hub';
+      } else if (hash.includes('youtube')) {
+        document.title = 'YouTube Description Formatter – Creator Tools Hub';
+      } else if (hash.includes('about')) {
+        document.title = 'About Us – Creator Tools Hub';
+      } else if (hash.includes('contact')) {
+        document.title = 'Contact Support – Creator Tools Hub';
+      } else {
+        document.title = 'Creator Tools Hub – Free Online Tools for Creators and Businesses';
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      // Close mobile menu if open
+      document.getElementById('mobile-menu').classList.add('hidden');
+    }
+
+    window.addEventListener('hashchange', handleRoute);
+    window.addEventListener('DOMContentLoaded', () => {
+      initTheme();
+      handleRoute();
+      initToolSearch();
+      initInstagramTool();
+      initPDFTool();
+      initYouTubeTool();
+      initContactForm();
+      initHostingModal();
+    });
+
+    // Mobile menu toggle
+    document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+      document.getElementById('mobile-menu').classList.toggle('hidden');
+    });
+
+    /* ==========================================================================
+       2. LIGHT / DARK THEME ENGINE
+       ========================================================================== */
+    function initTheme() {
+      const themeToggleBtn = document.getElementById('theme-toggle');
+      const sunIcon = document.getElementById('sun-icon');
+      const moonIcon = document.getElementById('moon-icon');
+
+      function updateThemeIcons(isDark) {
+        if (isDark) {
+          sunIcon.classList.remove('hidden');
+          moonIcon.classList.add('hidden');
+        } else {
+          sunIcon.classList.add('hidden');
+          moonIcon.classList.remove('hidden');
+        }
+      }
+
+      const savedTheme = localStorage.getItem('cth_theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const isDark = savedTheme ? savedTheme === 'dark' : prefersDark;
+
+      if (isDark) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+      updateThemeIcons(isDark);
+
+      themeToggleBtn.addEventListener('click', () => {
+        const currentlyDark = document.documentElement.classList.contains('dark');
+        if (currentlyDark) {
+          document.documentElement.classList.remove('dark');
+          localStorage.setItem('cth_theme', 'light');
+          updateThemeIcons(false);
+        } else {
+          document.documentElement.classList.add('dark');
+          localStorage.setItem('cth_theme', 'dark');
+          updateThemeIcons(true);
+        }
+      });
+    }
+
+    /* ==========================================================================
+       3. HOMEPAGE TOOL SEARCH FILTER
+       ========================================================================== */
+    function initToolSearch() {
+      const searchInput = document.getElementById('tool-search-input');
+      const toolCards = document.querySelectorAll('.tool-card');
+
+      if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+          const query = e.target.value.toLowerCase().trim();
+          toolCards.forEach(card => {
+            const tags = card.getAttribute('data-tool-name') || '';
+            const title = card.querySelector('h3').textContent.toLowerCase();
+            const desc = card.querySelector('p').textContent.toLowerCase();
+            if (tags.includes(query) || title.includes(query) || desc.includes(query)) {
+              card.style.display = 'flex';
+            } else {
+              card.style.display = 'none';
+            }
+          });
+        });
+      }
+    }
+
+    /* ==========================================================================
+       4. TOOL 1: INSTAGRAM SIZE CONVERTER LOGIC
+       ========================================================================== */
+    function initInstagramTool() {
+      const dropzone = document.getElementById('ig-dropzone');
+      const fileInput = document.getElementById('ig-file-input');
+      const fileInfo = document.getElementById('ig-file-info');
+      const fileNameEl = document.getElementById('ig-file-name');
+      const fileDimEl = document.getElementById('ig-file-dim');
+      const removeFileBtn = document.getElementById('ig-remove-file-btn');
+      const canvas = document.getElementById('ig-canvas');
+      const emptyState = document.getElementById('ig-empty-state');
+      const originalImg = document.getElementById('ig-original-img');
+      const downloadBtn = document.getElementById('ig-download-btn');
+      const resetBtn = document.getElementById('ig-reset-btn');
+
+      const presetButtons = document.querySelectorAll('.ig-preset-btn');
+      const customToggle = document.getElementById('ig-custom-toggle');
+      const customInputs = document.getElementById('ig-custom-inputs');
+      const customW = document.getElementById('ig-custom-w');
+      const customH = document.getElementById('ig-custom-h');
+
+      const fitModeRadios = document.querySelectorAll('input[name="ig-fit-mode"]');
+      const containBgBox = document.getElementById('ig-contain-bg-box');
+      const panBox = document.getElementById('ig-pan-box');
+      const panX = document.getElementById('ig-pan-x');
+      const panY = document.getElementById('ig-pan-y');
+      const panXVal = document.getElementById('ig-pan-x-val');
+      const panYVal = document.getElementById('ig-pan-y-val');
+      const bgStyleRadios = document.querySelectorAll('input[name="ig-bg-style"]');
+      const customColorRow = document.getElementById('ig-custom-color-row');
+      const customBgColor = document.getElementById('ig-custom-bg-color');
+
+      const formatRadios = document.querySelectorAll('input[name="ig-format"]');
+      const qualityBox = document.getElementById('ig-quality-box');
+      const qualitySlider = document.getElementById('ig-quality');
+      const qualityVal = document.getElementById('ig-quality-val');
+
+      const previewBadge = document.getElementById('ig-preview-badge');
+      const targetAspectEl = document.getElementById('ig-target-aspect');
+      const targetDimsEl = document.getElementById('ig-target-dims');
+      const estSizeEl = document.getElementById('ig-est-size');
+      const viewAfterBtn = document.getElementById('ig-view-after-btn');
+      const viewBeforeBtn = document.getElementById('ig-view-before-btn');
+
+      let currentImage = null;
+      let originalFileSize = 0;
+      let targetWidth = 1080;
+      let targetHeight = 1080;
+      let targetLabel = 'Square Post (1:1)';
+
+      // Drag and Drop
+      dropzone.addEventListener('click', () => fileInput.click());
+      dropzone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropzone.classList.add('border-pink-500', 'bg-pink-50/50');
+      });
+      dropzone.addEventListener('dragleave', () => {
+        dropzone.classList.remove('border-pink-500', 'bg-pink-50/50');
+      });
+      dropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('border-pink-500', 'bg-pink-50/50');
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+          handleFile(e.dataTransfer.files[0]);
+        }
+      });
+      fileInput.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files[0]) {
+          handleFile(e.target.files[0]);
+        }
+      });
+
+      removeFileBtn.addEventListener('click', resetAll);
+      resetBtn.addEventListener('click', resetAll);
+
+      function handleFile(file) {
+        if (!file.type.match(/image\/(jpeg|png|webp)/)) {
+          alert('Please upload a supported image format: JPG, PNG, or WebP.');
+          return;
+        }
+        originalFileSize = file.size;
+        fileNameEl.textContent = file.name;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            currentImage = img;
+            originalImg.src = img.src;
+            const mb = (file.size / (1024 * 1024)).toFixed(2);
+            fileDimEl.textContent = `${img.naturalWidth} × ${img.naturalHeight} px • ${mb} MB`;
+            fileInfo.classList.remove('hidden');
+            emptyState.classList.add('hidden');
+            canvas.classList.remove('hidden');
+            downloadBtn.removeAttribute('disabled');
+            renderCanvas();
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+
+      function resetAll() {
+        currentImage = null;
+        fileInput.value = '';
+        fileInfo.classList.add('hidden');
+        canvas.classList.add('hidden');
+        originalImg.classList.add('hidden');
+        emptyState.classList.remove('hidden');
+        downloadBtn.setAttribute('disabled', 'true');
+        estSizeEl.textContent = '–';
+      }
+
+      // Presets
+      presetButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          presetButtons.forEach(b => {
+            b.classList.remove('active', 'border-pink-500', 'bg-pink-50/50', 'dark:bg-pink-950/30', 'text-pink-700', 'dark:text-pink-300');
+            b.classList.add('border-slate-200', 'dark:border-slate-800');
+          });
+          btn.classList.add('active', 'border-pink-500', 'bg-pink-50/50', 'dark:bg-pink-950/30', 'text-pink-700', 'dark:text-pink-300');
+          btn.classList.remove('border-slate-200', 'dark:border-slate-800');
+
+          customToggle.checked = false;
+          customInputs.classList.add('opacity-50', 'pointer-events-none');
+
+          targetWidth = parseInt(btn.getAttribute('data-width'));
+          targetHeight = parseInt(btn.getAttribute('data-height'));
+          targetLabel = btn.getAttribute('data-name');
+          updateMetricsUI();
+          renderCanvas();
+        });
+      });
+
+      // Custom Dim Toggle
+      customToggle.addEventListener('change', () => {
+        if (customToggle.checked) {
+          customInputs.classList.remove('opacity-50', 'pointer-events-none');
+          presetButtons.forEach(b => b.classList.remove('border-pink-500', 'bg-pink-50/50', 'text-pink-700'));
+          targetWidth = parseInt(customW.value) || 1080;
+          targetHeight = parseInt(customH.value) || 1080;
+          targetLabel = 'Custom';
+        } else {
+          customInputs.classList.add('opacity-50', 'pointer-events-none');
+          presetButtons[0].click();
+        }
+        updateMetricsUI();
+        renderCanvas();
+      });
+
+      customW.addEventListener('input', () => {
+        if (customToggle.checked) {
+          targetWidth = Math.max(100, Math.min(4000, parseInt(customW.value) || 1080));
+          updateMetricsUI();
+          renderCanvas();
+        }
+      });
+      customH.addEventListener('input', () => {
+        if (customToggle.checked) {
+          targetHeight = Math.max(100, Math.min(4000, parseInt(customH.value) || 1080));
+          updateMetricsUI();
+          renderCanvas();
+        }
+      });
+
+      // Fit mode
+      fitModeRadios.forEach(radio => {
+        radio.addEventListener('change', () => {
+          if (radio.value === 'contain') {
+            containBgBox.classList.remove('hidden');
+            panBox.classList.add('hidden');
+          } else {
+            containBgBox.classList.add('hidden');
+            panBox.classList.remove('hidden');
+          }
+          renderCanvas();
+        });
+      });
+
+      // Background choices
+      bgStyleRadios.forEach(r => {
+        r.addEventListener('change', () => {
+          if (r.value === 'custom') {
+            customColorRow.classList.remove('hidden');
+          } else {
+            customColorRow.classList.add('hidden');
+          }
+          renderCanvas();
+        });
+      });
+      customBgColor.addEventListener('input', renderCanvas);
+
+      // Pan sliders
+      panX.addEventListener('input', () => {
+        panXVal.textContent = `${panX.value}%`;
+        renderCanvas();
+      });
+      panY.addEventListener('input', () => {
+        panYVal.textContent = `${panY.value}%`;
+        renderCanvas();
+      });
+
+      // Quality
+      qualitySlider.addEventListener('input', () => {
+        qualityVal.textContent = `${qualitySlider.value}%`;
+        renderCanvas();
+      });
+
+      // Format changes
+      formatRadios.forEach(r => {
+        r.addEventListener('change', () => {
+          if (r.value === 'png') {
+            qualityBox.classList.add('opacity-40', 'pointer-events-none');
+          } else {
+            qualityBox.classList.remove('opacity-40', 'pointer-events-none');
+          }
+          renderCanvas();
+        });
+      });
+
+      // Toggle Before vs After
+      viewAfterBtn.addEventListener('click', () => {
+        viewAfterBtn.classList.add('bg-white', 'dark:bg-slate-700', 'text-slate-900', 'dark:text-white', 'shadow-xs');
+        viewBeforeBtn.classList.remove('bg-white', 'dark:bg-slate-700', 'text-slate-900', 'dark:text-white', 'shadow-xs');
+        if (currentImage) {
+          canvas.classList.remove('hidden');
+          originalImg.classList.add('hidden');
+        }
+      });
+      viewBeforeBtn.addEventListener('click', () => {
+        viewBeforeBtn.classList.add('bg-white', 'dark:bg-slate-700', 'text-slate-900', 'dark:text-white', 'shadow-xs');
+        viewAfterBtn.classList.remove('bg-white', 'dark:bg-slate-700', 'text-slate-900', 'dark:text-white', 'shadow-xs');
+        if (currentImage) {
+          originalImg.classList.remove('hidden');
+          canvas.classList.add('hidden');
+        }
+      });
+
+      function updateMetricsUI() {
+        previewBadge.textContent = `${targetWidth} × ${targetHeight}`;
+        targetDimsEl.textContent = `${targetWidth} × ${targetHeight} px`;
+        const aspect = (targetWidth / targetHeight).toFixed(2);
+        targetAspectEl.textContent = `${targetLabel} (${aspect}:1)`;
+      }
+
+      function renderCanvas() {
+        if (!currentImage) return;
+
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+
+        const fitMode = document.querySelector('input[name="ig-fit-mode"]:checked').value;
+        const imgW = currentImage.naturalWidth;
+        const imgH = currentImage.naturalHeight;
+
+        if (fitMode === 'cover') {
+          // Fill and Crop
+          const imgAspect = imgW / imgH;
+          const targetAspect = targetWidth / targetHeight;
+
+          let sWidth, sHeight, sx, sy;
+          if (imgAspect > targetAspect) {
+            // Image is wider than target
+            sHeight = imgH;
+            sWidth = imgH * targetAspect;
+            const maxPanX = imgW - sWidth;
+            sx = maxPanX * (parseInt(panX.value) / 100);
+            sy = 0;
+          } else {
+            // Image is taller than target
+            sWidth = imgW;
+            sHeight = imgW / targetAspect;
+            sx = 0;
+            const maxPanY = imgH - sHeight;
+            sy = maxPanY * (parseInt(panY.value) / 100);
+          }
+
+          ctx.drawImage(currentImage, sx, sy, sWidth, sHeight, 0, 0, targetWidth, targetHeight);
+
+        } else {
+          // Contain and Pad
+          const bgStyle = document.querySelector('input[name="ig-bg-style"]:checked').value;
+
+          if (bgStyle === 'blur') {
+            // Blurred backdrop
+            ctx.save();
+            ctx.filter = 'blur(30px) brightness(0.85)';
+            ctx.drawImage(currentImage, -50, -50, targetWidth + 100, targetHeight + 100);
+            ctx.restore();
+          } else if (bgStyle === 'custom') {
+            ctx.fillStyle = customBgColor.value;
+            ctx.fillRect(0, 0, targetWidth, targetHeight);
+          } else {
+            ctx.fillStyle = bgStyle;
+            ctx.fillRect(0, 0, targetWidth, targetHeight);
+          }
+
+          // Draw main fitted image
+          const scale = Math.min(targetWidth / imgW, targetHeight / imgH);
+          const dw = imgW * scale;
+          const dh = imgH * scale;
+          const dx = (targetWidth - dw) / 2;
+          const dy = (targetHeight - dh) / 2;
+
+          ctx.drawImage(currentImage, dx, dy, dw, dh);
+        }
+
+        // Estimate file size based on format & quality
+        estimateExportSize();
+      }
+
+      function estimateExportSize() {
+        const format = document.querySelector('input[name="ig-format"]:checked').value;
+        const mimeType = format === 'png' ? 'image/png' : (format === 'webp' ? 'image/webp' : 'image/jpeg');
+        const quality = parseInt(qualitySlider.value) / 100;
+
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const kb = (blob.size / 1024).toFixed(0);
+            estSizeEl.textContent = `~ ${kb} KB (${format.toUpperCase()})`;
+          }
+        }, mimeType, quality);
+      }
+
+      // Download Formatted Image
+      downloadBtn.addEventListener('click', () => {
+        if (!currentImage) return;
+
+        const format = document.querySelector('input[name="ig-format"]:checked').value;
+        const mimeType = format === 'png' ? 'image/png' : (format === 'webp' ? 'image/webp' : 'image/jpeg');
+        const quality = parseInt(qualitySlider.value) / 100;
+        const ext = format === 'jpeg' ? 'jpg' : format;
+
+        canvas.toBlob((blob) => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `instagram-${targetWidth}x${targetHeight}-${Date.now()}.${ext}`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+          // Confetti celebration if library exists
+          if (window.confetti) {
+            window.confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 } });
+          }
+        }, mimeType, quality);
+      });
+    }
+
+    /* ==========================================================================
+       5. TOOL 2: PDF PAGE ORGANIZER & MERGER (PDF.js + pdf-lib)
+       ========================================================================== */
+    function initPDFTool() {
+      const dropzone = document.getElementById('pdf-dropzone');
+      const fileInput = document.getElementById('pdf-file-input');
+      const uploadBox = document.getElementById('pdf-upload-box');
+      const loadingBar = document.getElementById('pdf-loading-bar');
+      const loadingText = document.getElementById('pdf-loading-text');
+      const workspace = document.getElementById('pdf-workspace');
+      const grid = document.getElementById('pdf-grid');
+      const pageCountBadge = document.getElementById('pdf-page-count-badge');
+      const selectedCountEl = document.getElementById('pdf-selected-count');
+      const fileListPreview = document.getElementById('pdf-file-list-preview');
+
+      const selectAllBtn = document.getElementById('pdf-select-all-btn');
+      const deselectAllBtn = document.getElementById('pdf-deselect-all-btn');
+      const rotateAllBtn = document.getElementById('pdf-rotate-all-btn');
+      const deleteSelectedBtn = document.getElementById('pdf-delete-selected-btn');
+      const addMoreBtn = document.getElementById('pdf-add-more-btn');
+      const extractBtn = document.getElementById('pdf-extract-btn');
+      const downloadBtn = document.getElementById('pdf-download-btn');
+      const resetBtn = document.getElementById('pdf-reset-btn');
+
+      // State arrays
+      let loadedPdfs = []; // Array of { name, bytes, pdfDoc }
+      let pages = []; // Array of { id, pdfIndex, pageIndex, rotation: 0, thumbnailDataUrl, selected: false }
+      let draggedCardId = null;
+
+      dropzone.addEventListener('click', () => fileInput.click());
+      addMoreBtn.addEventListener('click', () => fileInput.click());
+
+      dropzone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropzone.classList.add('border-blue-500', 'bg-blue-50/50');
+      });
+      dropzone.addEventListener('dragleave', () => {
+        dropzone.classList.remove('border-blue-500', 'bg-blue-50/50');
+      });
+      dropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('border-blue-500', 'bg-blue-50/50');
+        if (e.dataTransfer.files && e.dataTransfer.files.length) {
+          loadFiles(Array.from(e.dataTransfer.files));
+        }
+      });
+      fileInput.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files.length) {
+          loadFiles(Array.from(e.target.files));
+        }
+      });
+
+      resetBtn.addEventListener('click', resetPDFState);
+
+      function resetPDFState() {
+        loadedPdfs = [];
+        pages = [];
+        grid.innerHTML = '';
+        workspace.classList.add('hidden');
+        uploadBox.classList.remove('hidden');
+        fileInput.value = '';
+      }
+
+      async function loadFiles(files) {
+        const validFiles = files.filter(f => f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf'));
+        if (!validFiles.length) {
+          alert('Please select valid PDF files.');
+          return;
+        }
+
+        uploadBox.classList.add('hidden');
+        loadingBar.classList.remove('hidden');
+
+        try {
+          for (let f = 0; f < validFiles.length; f++) {
+            const file = validFiles[f];
+            loadingText.textContent = `Reading ${file.name} (${f + 1}/${validFiles.length})...`;
+            
+            const arrayBuffer = await file.arrayBuffer();
+            const pdfDoc = await pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
+            
+            const pdfIndex = loadedPdfs.length;
+            loadedPdfs.push({
+              name: file.name,
+              bytes: new Uint8Array(arrayBuffer),
+              pageCount: pdfDoc.numPages
+            });
+
+            // Render thumbnail for each page
+            for (let p = 1; p <= pdfDoc.numPages; p++) {
+              loadingText.textContent = `Rendering page ${p} of ${file.name}...`;
+              const page = await pdfDoc.getPage(p);
+              const viewport = page.getViewport({ scale: 0.5 });
+              const canvas = document.createElement('canvas');
+              const ctx = canvas.getContext('2d');
+              canvas.width = viewport.width;
+              canvas.height = viewport.height;
+
+              await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+              const thumbnailDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+
+              pages.push({
+                id: `p_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+                pdfIndex: pdfIndex,
+                pageIndex: p - 1, // 0-indexed for pdf-lib
+                rotation: 0,
+                thumbnailDataUrl: thumbnailDataUrl,
+                selected: false
+              });
+            }
+          }
+
+          loadingBar.classList.add('hidden');
+          workspace.classList.remove('hidden');
+          renderPDFGrid();
+        } catch (err) {
+          console.error(err);
+          loadingBar.classList.add('hidden');
+          uploadBox.classList.remove('hidden');
+          alert('Failed to process PDF: ' + err.message);
+        }
+      }
+
+      function renderPDFGrid() {
+        grid.innerHTML = '';
+        pageCountBadge.textContent = `${pages.length} Pages`;
+        
+        const fileNames = loadedPdfs.map(p => p.name).join(', ');
+        fileListPreview.textContent = `Files: ${fileNames}`;
+
+        pages.forEach((pageItem, index) => {
+          const card = document.createElement('div');
+          card.className = `pdf-card bg-slate-50 dark:bg-slate-800 rounded-xl p-3 border border-slate-200 dark:border-slate-700 shadow-xs flex flex-col justify-between transition-all ${pageItem.selected ? 'selected ring-2 ring-blue-500' : ''}`;
+          card.draggable = true;
+          card.setAttribute('data-id', pageItem.id);
+
+          // Card Header: Checkbox & Page Label
+          const header = document.createElement('div');
+          header.className = 'flex items-center justify-between mb-2';
+          header.innerHTML = `
+            <label class="flex items-center gap-1.5 cursor-pointer">
+              <input type="checkbox" class="pdf-page-select rounded text-blue-600 focus:ring-blue-500 w-3.5 h-3.5" ${pageItem.selected ? 'checked' : ''} />
+              <span class="text-xs font-bold text-slate-700 dark:text-slate-200">#${index + 1}</span>
+            </label>
+            <span class="text-[10px] text-slate-400 truncate max-w-[80px]" title="${loadedPdfs[pageItem.pdfIndex].name}">
+              ${loadedPdfs[pageItem.pdfIndex].name}
+            </span>
+          `;
+
+          // Card Thumbnail
+          const thumbWrap = document.createElement('div');
+          thumbWrap.className = 'flex-grow flex items-center justify-center p-2 min-h-[140px] overflow-hidden bg-white dark:bg-slate-900 rounded-lg border border-slate-200/60 dark:border-slate-700/60 my-1 cursor-grab';
+          const img = document.createElement('img');
+          img.src = pageItem.thumbnailDataUrl;
+          img.alt = `Page ${index + 1}`;
+          img.className = 'max-h-[130px] max-w-full object-contain transition-transform';
+          img.style.transform = `rotate(${pageItem.rotation}deg)`;
+          thumbWrap.appendChild(img);
+
+          // Card Controls: Rotate Left, Rotate Right, Move Left/Right, Delete
+          const footer = document.createElement('div');
+          footer.className = 'flex items-center justify-between gap-1 pt-2 border-t border-slate-200/60 dark:border-slate-700/60 text-slate-500';
+          footer.innerHTML = `
+            <div class="flex items-center gap-1">
+              <button title="Move Left" class="btn-move-left p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-700 ${index === 0 ? 'opacity-30 pointer-events-none' : ''}">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+              </button>
+              <button title="Move Right" class="btn-move-right p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-700 ${index === pages.length - 1 ? 'opacity-30 pointer-events-none' : ''}">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+              </button>
+            </div>
+            <div class="flex items-center gap-1">
+              <button title="Rotate +90°" class="btn-rotate p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-blue-600">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+              </button>
+              <button title="Delete Page" class="btn-delete p-1 rounded hover:bg-rose-100 hover:text-rose-600 dark:hover:bg-rose-950">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+              </button>
+            </div>
+          `;
+
+          // Event Handlers for Card Elements
+          header.querySelector('.pdf-page-select').addEventListener('change', (e) => {
+            pageItem.selected = e.target.checked;
+            card.classList.toggle('selected', pageItem.selected);
+            card.classList.toggle('ring-2', pageItem.selected);
+            card.classList.toggle('ring-blue-500', pageItem.selected);
+            updateSelectedCount();
+          });
+
+          footer.querySelector('.btn-rotate').addEventListener('click', () => {
+            pageItem.rotation = (pageItem.rotation + 90) % 360;
+            img.style.transform = `rotate(${pageItem.rotation}deg)`;
+          });
+
+          footer.querySelector('.btn-delete').addEventListener('click', () => {
+            pages.splice(index, 1);
+            renderPDFGrid();
+          });
+
+          footer.querySelector('.btn-move-left').addEventListener('click', () => {
+            if (index > 0) {
+              const temp = pages[index];
+              pages[index] = pages[index - 1];
+              pages[index - 1] = temp;
+              renderPDFGrid();
+            }
+          });
+
+          footer.querySelector('.btn-move-right').addEventListener('click', () => {
+            if (index < pages.length - 1) {
+              const temp = pages[index];
+              pages[index] = pages[index + 1];
+              pages[index + 1] = temp;
+              renderPDFGrid();
+            }
+          });
+
+          // Drag and Drop Events
+          card.addEventListener('dragstart', (e) => {
+            draggedCardId = pageItem.id;
+            card.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+          });
+          card.addEventListener('dragend', () => {
+            card.classList.remove('dragging');
+          });
+          card.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+          });
+          card.addEventListener('drop', (e) => {
+            e.preventDefault();
+            if (draggedCardId && draggedCardId !== pageItem.id) {
+              const fromIndex = pages.findIndex(p => p.id === draggedCardId);
+              const toIndex = pages.findIndex(p => p.id === pageItem.id);
+              if (fromIndex !== -1 && toIndex !== -1) {
+                const movedItem = pages.splice(fromIndex, 1)[0];
+                pages.splice(toIndex, 0, movedItem);
+                renderPDFGrid();
+              }
+            }
+          });
+
+          card.appendChild(header);
+          card.appendChild(thumbWrap);
+          card.appendChild(footer);
+          grid.appendChild(card);
+        });
+
+        updateSelectedCount();
+      }
+
+      function updateSelectedCount() {
+        const count = pages.filter(p => p.selected).length;
+        selectedCountEl.textContent = `${count} pages selected`;
+      }
+
+      // Batch selection
+      selectAllBtn.addEventListener('click', () => {
+        pages.forEach(p => p.selected = true);
+        renderPDFGrid();
+      });
+      deselectAllBtn.addEventListener('click', () => {
+        pages.forEach(p => p.selected = false);
+        renderPDFGrid();
+      });
+      rotateAllBtn.addEventListener('click', () => {
+        pages.forEach(p => p.rotation = (p.rotation + 90) % 360);
+        renderPDFGrid();
+      });
+      deleteSelectedBtn.addEventListener('click', () => {
+        const selectedCount = pages.filter(p => p.selected).length;
+        if (!selectedCount) {
+          alert('No pages selected.');
+          return;
+        }
+        if (confirm(`Delete ${selectedCount} selected pages?`)) {
+          pages = pages.filter(p => !p.selected);
+          renderPDFGrid();
+        }
+      });
+
+      // Extract Selected into a new PDF
+      extractBtn.addEventListener('click', () => {
+        const selected = pages.filter(p => p.selected);
+        if (!selected.length) {
+          alert('Please select at least one page to extract.');
+          return;
+        }
+        generateAndDownloadPDF(selected, 'extracted-pages.pdf');
+      });
+
+      // Download All Organized
+      downloadBtn.addEventListener('click', () => {
+        if (!pages.length) {
+          alert('No pages in workspace to export.');
+          return;
+        }
+        generateAndDownloadPDF(pages, 'organized-document.pdf');
+      });
+
+      // Byte-level PDF Generation using PDFLib
+      async function generateAndDownloadPDF(targetPages, outputFilename) {
+        if (!window.PDFLib) {
+          alert('PDF generation library is loading. Please try again in a second.');
+          return;
+        }
+
+        downloadBtn.disabled = true;
+        downloadBtn.innerHTML = '<span>Compiling PDF...</span>';
+
+        try {
+          const { PDFDocument, degrees } = window.PDFLib;
+          const mergedPdf = await PDFDocument.create();
+
+          // Cache loaded source documents to prevent reparsing identical bytes
+          const sourceDocMap = new Map();
+
+          for (const pageItem of targetPages) {
+            if (!sourceDocMap.has(pageItem.pdfIndex)) {
+              const srcBytes = loadedPdfs[pageItem.pdfIndex].bytes;
+              const loadedDoc = await PDFDocument.load(srcBytes);
+              sourceDocMap.set(pageItem.pdfIndex, loadedDoc);
+            }
+
+            const srcDoc = sourceDocMap.get(pageItem.pdfIndex);
+            const [copiedPage] = await mergedPdf.copyPages(srcDoc, [pageItem.pageIndex]);
+
+            // Apply rotation
+            if (pageItem.rotation !== 0) {
+              const currentAngle = copiedPage.getRotation().angle;
+              copiedPage.setRotation(degrees((currentAngle + pageItem.rotation) % 360));
+            }
+
+            mergedPdf.addPage(copiedPage);
+          }
+
+          const pdfBytes = await mergedPdf.save();
+          const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = outputFilename;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+          if (window.confetti) {
+            window.confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 } });
+          }
+        } catch (err) {
+          console.error(err);
+          alert('Error generating PDF: ' + err.message);
+        } finally {
+          downloadBtn.disabled = false;
+          downloadBtn.innerHTML = `
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            Download Organized PDF
+          `;
+        }
+      }
+    }
+
+    /* ==========================================================================
+       6. TOOL 3: YOUTUBE DESCRIPTION FORMATTER LOGIC
+       ========================================================================== */
+    function initYouTubeTool() {
+      const titleInput = document.getElementById('yt-title-input');
+      const titleCount = document.getElementById('yt-title-count');
+      const introInput = document.getElementById('yt-intro-input');
+      const chaptersList = document.getElementById('yt-chapters-list');
+      const addChapterBtn = document.getElementById('yt-add-chapter-btn');
+      const addSampleTimestamps = document.getElementById('yt-add-sample-timestamps');
+      const chapterStatus = document.getElementById('yt-chapter-status');
+      
+      const socialIg = document.getElementById('yt-social-ig');
+      const socialX = document.getElementById('yt-social-x');
+      const socialWeb = document.getElementById('yt-social-web');
+      const socialDiscord = document.getElementById('yt-social-discord');
+
+      const hashtagInput = document.getElementById('yt-hashtag-input');
+      const addHashtagBtn = document.getElementById('yt-add-hashtag-btn');
+      const hashtagBadges = document.getElementById('yt-hashtag-badges');
+
+      const gearInput = document.getElementById('yt-gear-input');
+      const disclaimerInput = document.getElementById('yt-disclaimer-input');
+
+      const outputPreview = document.getElementById('yt-output-preview');
+      const charCount = document.getElementById('yt-char-count');
+      const charProgress = document.getElementById('yt-char-progress');
+      const copyBtn = document.getElementById('yt-copy-btn');
+      const downloadTxtBtn = document.getElementById('yt-download-txt-btn');
+      const copyToast = document.getElementById('yt-copy-toast');
+      const resetBtn = document.getElementById('yt-reset-btn');
+      const templateButtons = document.querySelectorAll('.yt-template-btn');
+
+      let chapters = [
+        { time: '00:00', title: 'Introduction' },
+        { time: '01:30', title: 'Key Features & Workflow' },
+        { time: '04:15', title: 'Step-by-Step Tutorial' },
+        { time: '08:00', title: 'Pro Tips & Optimization' },
+        { time: '10:45', title: 'Summary & Next Steps' }
+      ];
+
+      let hashtags = ['CreatorTools', 'Productivity', 'VideoSEO', 'ContentCreator'];
+
+      // Character count listener for Title
+      titleInput.addEventListener('input', () => {
+        titleCount.textContent = `${titleInput.value.length} / 100`;
+        updateOutput();
+      });
+
+      // Render chapters input list
+      function renderChaptersList() {
+        chaptersList.innerHTML = '';
+        chapters.forEach((chap, idx) => {
+          const row = document.createElement('div');
+          row.className = 'flex items-center gap-2';
+          row.innerHTML = `
+            <input type="text" value="${chap.time}" placeholder="00:00" class="chap-time w-24 px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-mono text-xs focus:ring-1 focus:ring-red-500" />
+            <input type="text" value="${chap.title}" placeholder="Chapter title" class="chap-title flex-grow px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs focus:ring-1 focus:ring-red-500" />
+            <button type="button" class="chap-del text-slate-400 hover:text-rose-500 p-1">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+          `;
+
+          row.querySelector('.chap-time').addEventListener('input', (e) => {
+            chap.time = e.target.value;
+            validateAndFormat();
+          });
+          row.querySelector('.chap-title').addEventListener('input', (e) => {
+            chap.title = e.target.value;
+            validateAndFormat();
+          });
+          row.querySelector('.chap-del').addEventListener('click', () => {
+            chapters.splice(idx, 1);
+            renderChaptersList();
+            validateAndFormat();
+          });
+
+          chaptersList.appendChild(row);
+        });
+
+        validateAndFormat();
+      }
+
+      addChapterBtn.addEventListener('click', () => {
+        chapters.push({ time: '', title: '' });
+        renderChaptersList();
+      });
+
+      addSampleTimestamps.addEventListener('click', () => {
+        chapters = [
+          { time: '00:00', title: 'Introduction' },
+          { time: '01:30', title: 'Main Topic Overview' },
+          { time: '03:45', title: 'Detailed Walkthrough' },
+          { time: '07:15', title: 'Best Practices' },
+          { time: '09:50', title: 'Conclusion & Next Steps' }
+        ];
+        renderChaptersList();
+      });
+
+      function validateAndFormat() {
+        // Validate YouTube Chapter requirements:
+        // 1. First timestamp must start at 00:00 (or 0:00)
+        // 2. At least 3 chapters
+        let isValid = true;
+        let message = '✓ Valid YouTube Chapters';
+
+        if (chapters.length < 3) {
+          isValid = false;
+          message = '⚠️ Minimum 3 chapters needed';
+        } else if (!chapters[0].time.match(/^0?0:00$/)) {
+          isValid = false;
+          message = '⚠️ First timestamp must be 00:00';
+        }
+
+        if (isValid) {
+          chapterStatus.className = 'text-xs font-medium text-emerald-600 dark:text-emerald-400';
+          chapterStatus.textContent = message;
+        } else {
+          chapterStatus.className = 'text-xs font-medium text-amber-600 dark:text-amber-400';
+          chapterStatus.textContent = message;
+        }
+
+        updateOutput();
+      }
+
+      // Hashtag Logic
+      function renderHashtags() {
+        hashtagBadges.innerHTML = '';
+        hashtags.forEach((tag, idx) => {
+          const badge = document.createElement('span');
+          badge.className = 'inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-700 dark:text-slate-200';
+          badge.innerHTML = `
+            #${tag}
+            <button type="button" class="text-slate-400 hover:text-rose-500 font-bold ml-1">&times;</button>
+          `;
+          badge.querySelector('button').addEventListener('click', () => {
+            hashtags.splice(idx, 1);
+            renderHashtags();
+            updateOutput();
+          });
+          hashtagBadges.appendChild(badge);
+        });
+        updateOutput();
+      }
+
+      function addHashtag() {
+        const val = hashtagInput.value.replace(/[^a-zA-Z0-9_]/g, '').trim();
+        if (val && !hashtags.includes(val)) {
+          hashtags.push(val);
+          hashtagInput.value = '';
+          renderHashtags();
+        }
+      }
+
+      addHashtagBtn.addEventListener('click', addHashtag);
+      hashtagInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          addHashtag();
+        }
+      });
+
+      // Quick Templates
+      templateButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const tmpl = btn.getAttribute('data-template');
+          if (tmpl === 'tutorial') {
+            titleInput.value = 'How to Master Web Tools in 10 Minutes (Tutorial)';
+            introInput.value = 'In this comprehensive tutorial, you will learn how to optimize your digital assets and documents directly in your browser. We cover end-to-end best practices with step-by-step examples.';
+            chapters = [
+              { time: '00:00', title: 'Tutorial Overview' },
+              { time: '01:15', title: 'Prerequisites' },
+              { time: '03:30', title: 'Core Implementation' },
+              { time: '06:45', title: 'Common Mistakes to Avoid' },
+              { time: '08:50', title: 'Final Results & Summary' }
+            ];
+            hashtags = ['WebTutorial', 'HowTo', 'DeveloperGuide', 'FreeTools'];
+          } else if (tmpl === 'podcast') {
+            titleInput.value = 'The Future of Independent Creators | Episode 42';
+            introInput.value = 'Welcome back to the show! In today’s episode, we sit down with industry leaders to discuss creator independence, audience retention, and the best free productivity software for 2026.';
+            chapters = [
+              { time: '00:00', title: 'Episode Introduction' },
+              { time: '02:00', title: 'Guest Background' },
+              { time: '14:20', title: 'Creator Economics in 2026' },
+              { time: '28:40', title: 'Audience Growth Playbook' },
+              { time: '45:10', title: 'Audience Q&A & Wrap Up' }
+            ];
+            hashtags = ['Podcast', 'CreatorEconomy', 'Interviews', 'BusinessInsights'];
+          } else if (tmpl === 'gaming') {
+            titleInput.value = 'I Tried the Hardest Challenge (Impossible Run)';
+            introInput.value = 'Can we beat the ultimate challenge on max difficulty with zero retries? Watch till the end to see the final showdown!';
+            chapters = [
+              { time: '00:00', title: 'The Rules' },
+              { time: '01:45', title: 'Early Game Strategy' },
+              { time: '05:10', title: 'Huge Mistake...' },
+              { time: '09:30', title: 'The Final Boss Fight' }
+            ];
+            hashtags = ['Gaming', 'ChallengeRun', 'Gameplay', 'ProPlays'];
+          } else {
+            // Standard
+            titleInput.value = 'Creator Tools Hub – Complete Workflow Showcase';
+            introInput.value = 'Discover how to resize Instagram posts, organize PDF pages, and format YouTube descriptions for maximum reach—100% free with zero backend.';
+            chapters = [
+              { time: '00:00', title: 'Introduction' },
+              { time: '01:30', title: 'Main Topic' },
+              { time: '04:15', title: 'Deep Dive' },
+              { time: '08:00', title: 'Summary' }
+            ];
+            hashtags = ['CreatorTools', 'YouTubeSEO', 'FreeTools'];
+          }
+          renderChaptersList();
+          renderHashtags();
+          updateOutput();
+        });
+      });
+
+      // Update Formatted Output Textarea
+      function updateOutput() {
+        let text = '';
+
+        // Title
+        if (titleInput.value.trim()) {
+          text += `VIDEO TITLE:\n${titleInput.value.trim()}\n\n`;
+        }
+
+        // About / Intro
+        if (introInput.value.trim()) {
+          text += `ABOUT THIS VIDEO\n${introInput.value.trim()}\n\n`;
+        }
+
+        // Timestamps & Chapters
+        const validChaps = chapters.filter(c => c.time.trim() && c.title.trim());
+        if (validChaps.length) {
+          text += `TIMESTAMPS\n`;
+          validChaps.forEach(c => {
+            text += `${c.time.trim()} ${c.title.trim()}\n`;
+          });
+          text += `\n`;
+        }
+
+        // Social Links
+        const socials = [];
+        if (socialIg.value.trim()) socials.push(`Instagram: ${socialIg.value.trim()}`);
+        if (socialX.value.trim()) socials.push(`X / Twitter: ${socialX.value.trim()}`);
+        if (socialWeb.value.trim()) socials.push(`Website: ${socialWeb.value.trim()}`);
+        if (socialDiscord.value.trim()) socials.push(`Discord: ${socialDiscord.value.trim()}`);
+
+        if (socials.length) {
+          text += `FOLLOW ME & COMMUNITY\n`;
+          text += socials.join('\n') + '\n\n';
+        }
+
+        // Gear / Resources
+        if (gearInput.value.trim()) {
+          text += `GEAR & RESOURCES\n${gearInput.value.trim()}\n\n`;
+        }
+
+        // Disclaimer
+        if (disclaimerInput.value.trim()) {
+          text += `DISCLAIMER\n${disclaimerInput.value.trim()}\n\n`;
+        }
+
+        // Hashtags
+        if (hashtags.length) {
+          text += `HASHTAGS\n`;
+          text += hashtags.map(h => `#${h}`).join(' ') + '\n';
+        }
+
+        outputPreview.value = text.trim();
+
+        // Length monitoring
+        const len = outputPreview.value.length;
+        charCount.textContent = len;
+        const pct = Math.min(100, (len / 5000) * 100);
+        charProgress.style.width = `${pct}%`;
+
+        if (len > 5000) {
+          charCount.classList.add('text-rose-600');
+          charProgress.classList.add('bg-rose-600');
+        } else {
+          charCount.classList.remove('text-rose-600');
+          charProgress.classList.remove('bg-rose-600');
+        }
+      }
+
+      // Input change listeners
+      [introInput, socialIg, socialX, socialWeb, socialDiscord, gearInput, disclaimerInput].forEach(el => {
+        el.addEventListener('input', updateOutput);
+      });
+
+      // Copy Description
+      copyBtn.addEventListener('click', async () => {
+        if (!outputPreview.value.trim()) return;
+        try {
+          await navigator.clipboard.writeText(outputPreview.value);
+          copyToast.classList.remove('hidden');
+          setTimeout(() => copyToast.classList.add('hidden'), 3500);
+
+          if (window.confetti) {
+            window.confetti({ particleCount: 35, spread: 50, origin: { y: 0.8 } });
+          }
+        } catch (err) {
+          outputPreview.select();
+          document.execCommand('copy');
+          copyToast.classList.remove('hidden');
+          setTimeout(() => copyToast.classList.add('hidden'), 3500);
+        }
+      });
+
+      // Download as TXT
+      downloadTxtBtn.addEventListener('click', () => {
+        if (!outputPreview.value.trim()) return;
+        const blob = new Blob([outputPreview.value], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `youtube-description-${Date.now()}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      });
+
+      // Reset
+      resetBtn.addEventListener('click', () => {
+        titleInput.value = '';
+        introInput.value = '';
+        socialIg.value = '';
+        socialX.value = '';
+        socialWeb.value = '';
+        socialDiscord.value = '';
+        gearInput.value = '';
+        chapters = [
+          { time: '00:00', title: 'Introduction' },
+          { time: '01:30', title: 'Main Topic' }
+        ];
+        hashtags = ['YouTube', 'Creator', 'Video'];
+        renderChaptersList();
+        renderHashtags();
+        updateOutput();
+      });
+
+      // Initial render
+      renderChaptersList();
+      renderHashtags();
+    }
+
+    /* ==========================================================================
+       7. CONTACT FORM SIMULATOR
+       ========================================================================== */
+    function initContactForm() {
+      const contactForm = document.getElementById('contact-form');
+      const contactSuccess = document.getElementById('contact-success');
+
+      if (contactForm) {
+        contactForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          contactSuccess.classList.remove('hidden');
+          contactForm.reset();
+          setTimeout(() => {
+            contactSuccess.classList.add('hidden');
+          }, 6000);
+        });
+      }
+    }
+
+    /* ==========================================================================
+       8. HOSTING INSTRUCTIONS MODAL
+       ========================================================================== */
+    function initHostingModal() {
+      const modal = document.getElementById('hosting-modal');
+      const openBtn = document.getElementById('open-hosting-modal');
+      const closeBtn1 = document.getElementById('close-hosting-modal');
+      const closeBtn2 = document.getElementById('close-hosting-modal-2');
+
+      if (openBtn) openBtn.addEventListener('click', () => modal.classList.remove('hidden'));
+      if (closeBtn1) closeBtn1.addEventListener('click', () => modal.classList.add('hidden'));
+      if (closeBtn2) closeBtn2.addEventListener('click', () => modal.classList.add('hidden'));
+
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.classList.add('hidden');
+      });
+    }
+  </script>
+</body>
+</html>
